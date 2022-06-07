@@ -1,0 +1,105 @@
+{
+  "NTP": {
+    "Enable": true,
+    "Server": "194.190.168.1",
+    "Offset": "10"
+  },
+  "WiFi": {
+    "Enable": true,
+    "SSID": "WiFi_Home_2.4",
+    "Password": "135792468"
+  },  
+  "MQTT": {
+    "Enable": true,
+    "Server": "192.168.0.103",
+    "Port": "1883",
+    "Login": "admin",
+    "Home_topic": "SmartHOME/ESP_1/",
+    "Password": "admin123"
+  },
+  "FTP": {
+    "Enable": true,
+    "Login": "admin",
+    "Password": "admin123"
+  },
+  "PCF8575": {
+    "Col": "2",
+    "board": [
+      {
+        "I2C_adr": "32",
+        "Type": "DI"
+      },
+      {
+        "I2C_adr": "33",
+        "Type": "DI"
+      }
+    ]
+  },
+  "DS18B20": {
+    "Col": "1",
+    "sensors": [
+      {
+        "address": "28FF641E843EB9C8",
+        "Description": "Дом, зал, температура воздуха",
+        "MQTT_out": {
+          "Enable": true,
+          "Col": "1",
+          "topic": [
+            "SmartHOME/home/temper/sensor1"
+          ]
+        }
+      }
+    ]
+  },
+  "DIs": {
+    "Col": "2",
+    "DI": [
+      {
+        "Type": "inner_PCF8575",
+        "Description": "Дом, положение физического выключателя света в туалете",
+        "PCF8575": {
+          "board_num": "0",
+          "input_num": "1"
+        },
+        "MQTT_out": {
+          "Enable": true,
+          "Col": "1",
+          "topic": [
+            "SmartHOME/home/key/lamp1"
+          ]
+        },
+        "MQTT_in": {
+          "Enable": false,
+          "topic": ""
+        },
+        "Time_setting": {
+          "t_in": "0",
+          "t_out": "0"
+        }
+      },
+      {
+        "Type": "inner_PCF8575",
+        "Description": "Дом, положение физического выключателя света в ванной",
+        "PCF8575": {
+          "board_num": "1",
+          "input_num": "2"
+        },
+        "MQTT_out": {
+          "Enable": true,
+          "Col": "1",
+          "topic": [
+            "SmartHOME/home/key/lamp2"
+          ]
+        },
+        "MQTT_in": {
+          "Enable": false,
+          "topic": ""
+        },
+        "Time_setting": {
+          "t_in": "0",
+          "t_out": "0"
+        }
+      }
+    ]
+  }
+}
