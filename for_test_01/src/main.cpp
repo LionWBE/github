@@ -1,211 +1,26 @@
 #include <Arduino.h>
 //************************************************************************************************************************
-//  Подключаем стандартную библиотеку для работы с Shield'ом по шине SPI
-#include "SPI.h"
-//  Подключаем стандартную библиотеку для работы с Ethernet
-#include "Ethernet.h"
-#include <EthernetUdp.h>      
-#include "lib_timer.h"
-#include <ESP8266WiFi.h>
-//************************************************************************************************************************
-const uint16_t localPort = 8888; // Local port to listen for UDP packets
-EthernetUDP udp;
-IPAddress ip(192, 168, 0, 177);
-IPAddress myDns(192, 168, 0, 1);
-//  Создаём объект client класса EthernetClient
-EthernetClient client;
-// Задаём MAC-адрес устройству. Главное, чтобы в сети не было уже зарегистрированно устройство с таким адресом
-byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
-char packetBuffer[50];
-MyClass_timer t1;
-String *MSG_LIST;
-//************************************************************************************************************************
-// bool sendPacket(const IPAddress& address, const uint8_t* buf, uint8_t bufSize);
-void EthernetW5500_Get_IP();
-void link_status();
-void receivePacket();
-void Send_UDP_Packet(IPAddress IP_to, String answer);
-void get_status_info(String *mas);
-String Get_Ether_MAC();
-void get_MSG_LIST(String *msg_list);
-void clear_buff(char *buf, byte col);
-//************************************************************************************************************************
-//************************************************************************************************************************
-//************************************************************************************************************************
-//************************************************************************************************************************
-void setup() {
-  //  Инициируем работу с монитором последовательного порта на скорости 9600 бод
+#include <Wire.h>                                     // подключаем библиотеку для работы с шиной I2C
+#include <iarduino_I2C_connect.h>                     // подключаем библиотеку для соединения arduino по шине I2C
+// Объявляем переменные и константы:
+iarduino_I2C_connect I2C2;                            // объявляем переменную для работы c библиотекой iarduino_I2C_connect
+void setup(){
   Serial.begin(115200);
-
-  Serial.println("wait 5 sec start");
-  delay(5000);
-  Serial.println("wait 5 sec end");
-
-  EthernetW5500_Get_IP();
-
-  Serial.println(F("Starting UDP"));
-  udp.begin(localPort);
-  Serial.print(F("Local port: "));
-  Serial.println(udp.localPort());  
-  Serial.print("WiFi MAC: ");
-  Serial.println(WiFi.macAddress());
-  Serial.print("ChipID: ");
-  Serial.println(ESP.getChipId());
-  Serial.print("Flash Chip ID: ");
-  Serial.println(ESP.getFlashChipId());
+  Serial.println();
+  Wire.begin();                                       // инициируем подключение к шине I2C в качестве ведущего (master) устройства
+}
+void loop(){
+//Считываем данные:
+  byte cur_reg;
+  byte reg[100];
   
-  pinMode(BUILTIN_LED, OUTPUT);
-  MSG_LIST = new String[10];
-  get_MSG_LIST(MSG_LIST);
-  t1.time_delay_const = 1000;
-  t1.start();
-}
-//************************************************************************************************************************
-void loop() {
-  receivePacket(); 
-  if (t1.is_done()){
-    link_status();
+  for (int i = 0; i < 30; i++) {
+    cur_reg = I2C2.readByte(0x01,i);
+    reg[i] = cur_reg;
+    Serial.print("REG[");
+    Serial.print(i);
+    Serial.print("] = ");
+    Serial.println(reg[i]);
   }
-}
-//************************************************************************************************************************
-//************************************************************************************************************************
-//************************************************************************************************************************
-//************************************************************************************************************************
-void receivePacket() {
-  int packetSize = udp.parsePacket();
-  if (packetSize) {
-    IPAddress remote_ip = udp.remoteIP();
-    clear_buff(packetBuffer, 50);
-    udp.read(packetBuffer, 50);
-    String msg = String(packetBuffer);
-    Serial.println(msg);
-
-    if(msg == MSG_LIST[0]){
-      Serial.println("получена команда выслать общий отчет");
-      byte col = 6;
-      String *a = new String[10];
-      get_status_info(a);
-      for (byte i = 0; i < col; i++) {
-        Send_UDP_Packet(remote_ip , a[i]);
-      }
-    }else if(msg == MSG_LIST[1]){
-      Serial.println("получена команда включить светодиод");
-      digitalWrite(BUILTIN_LED, LOW);
-    }else if(msg == MSG_LIST[2]){
-      Serial.println("получена команда выключить светодиод");
-      digitalWrite(BUILTIN_LED, HIGH);
-    }
-  }
-}
-//************************************************************************************************************************
-void clear_buff(char *buf, byte col){
-  // delete buf;
-  // buf = new char[50];
-  for (byte i = 0; i < col; i++) {
-    buf[i] = 0;
-  }
-}
-//************************************************************************************************************************
-void get_MSG_LIST(String *msg_list){
-  String str1;
-  msg_list[0] = "ESP_CMD_GET_STATUS";
-  msg_list[1] = "ESP_" + WiFi.macAddress() + "_CMD_LED_ON";
-  msg_list[2] = "ESP_" + WiFi.macAddress() + "_CMD_LED_OFF";
-  Serial.println(msg_list[0]);
-  Serial.println(msg_list[1]);
-  Serial.println(msg_list[2]);
-}
-//************************************************************************************************************************
-void get_status_info(String *mas){
-  String a;
-  a = "NAME = ESP_1";
-  mas[0] = a;
-  a = "IP = " + String(Ethernet.localIP().toString());
-  mas[1] = a;
-  a = "ETHER_MAC = " + Get_Ether_MAC();
-  mas[2] = a;
-  a = "WiFi_MAC = " + WiFi.macAddress();
-  mas[3] = a;
-  a = "ESP_ChipId = " + String(ESP.getChipId());
-  mas[4] = a;
-  a = "ESP_FlashChipId = " + String(ESP.getFlashChipId());
-  mas[5] = a;
-}
-//************************************************************************************************************************
-String Get_Ether_MAC(){
-  String rez = "";
-  String b;
-  byte macBuffer[6];
-  Ethernet.MACAddress(macBuffer);
-  for (byte octet = 0; octet < 6; octet++) {
-    b = String(macBuffer[octet], 16);
-    b.toUpperCase();
-    rez += b;
-    if (octet<5){
-      rez += ":";
-    }
-  }
-  return rez;
-}
-//************************************************************************************************************************
-void Send_UDP_Packet(IPAddress IP_to, String packet) {
-  udp.beginPacket(IP_to, 8889);
-  udp.write(packet.c_str());
-  udp.endPacket();
-}
-//************************************************************************************************************************
-void link_status(){
-  //  Запрос статуса соединения
-  auto link = Ethernet.linkStatus();
-  //  Вывод текста в монитор последовательного порта
-  Serial.print("Link status: ");
-  //  Проверяем значение переменной link
-  switch (link) {
-    //  Если "Статус: неизвестно", то
-    case Unknown:
-      //  выводим текст "Unknown" в монитор последовательного порта
-      Serial.println("Unknown");
-      break;
-    //  Если "Статус: подключение есть", то
-    case LinkON:
-      //  выводим текст "ON" в монитор последовательного порта
-      Serial.println("ON");
-      break;
-    //  Если "Статус: подключения нет", то
-    case LinkOFF:
-      //  выводим текст "OFF" в монитор последовательного порта
-      Serial.println("OFF");
-      break;
-  }  
-}
-//************************************************************************************************************************
-void EthernetW5500_Get_IP(){
-  Serial.println("Initialize Ethernet with DHCP:");
-  //  Если соединение с динамической адресацией не было установлено, то
-  if (Ethernet.begin(mac) == 0) {
-    //  Выводим сообщение об этом в монитор последовательного порта и
-    Serial.println("Failed to configure Ethernet using DHCP");
-    //  проверяем наличие самого Shield'а
-    if (Ethernet.hardwareStatus() == EthernetNoHardware) {
-      //  Если Shield не найден, то выводим соответствующее сообщение в монитор порта
-      Serial.println("Ethernet shield was not found.  Sorry, can't run without hardware. :( ");
-      //  Ничего больше не выполняется
-      while (true) {
-        delay(1); // do nothing, no point running without Ethernet hardware
-      }
-    }
-    //  Проверяем наличие соединения
-    if (Ethernet.linkStatus() == LinkOFF) {
-      //  Если соеднинение не установлено, то выводим соответствующее сообщение в монитор порта
-      Serial.println("Ethernet cable is not connected.");
-    }
-    // Пробуем установить соединение, используя статический IP-адрес
-    Ethernet.begin(mac, ip, myDns);
-  }
-  //  Если соединение с динамической адресацией было установлено, то
-  else {
-    //  Выводим в монитор порта соответствующее сообщение об этом и выводим назначенный устройству IP-адрес
-    Serial.print("  DHCP assigned IP ");
-    Serial.println(Ethernet.localIP());
-  }  
+  delay(1000);                                     
 }

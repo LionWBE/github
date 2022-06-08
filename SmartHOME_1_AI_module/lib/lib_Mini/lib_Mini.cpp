@@ -1,3 +1,4 @@
+// 08/06/2022
 #include "lib_Mini.h"
 //-------------------------------------------------------------------------------------------------------------------------------------
 char* create_char_array_from_string(String str){
@@ -40,10 +41,41 @@ byte hex_to_dec(String hex){
 void addr_string_to_byte(String str_addr, byte *byte_addr){
   String b;
   byte s;
-  Serial.println();
   for (byte i = 0; i < 8; i++){
     b = str_addr.substring(i*2 + i, i*2+2 + i);
     s = hex_to_dec(b);
     byte_addr[i] = char(s);
   }
+}
+// ************************************************************************************************************
+String addr_char_to_string(byte *addr){
+  String rez = "";
+  String b;
+  for (byte i = 0; i < 8; i++){
+    b = String(addr[i], HEX);
+    if (addr[i] < 16)	b = "0" + b;
+    rez += b;
+    if (i<7) rez += ":";
+  }
+  return rez;
+}
+// ************************************************************************************************************
+void float_to_4_byte(float fval, byte *bval){
+  // fval
+  // byte a;
+  memcpy(bval, &fval, 4);
+  // String rez = "";
+  // String b;
+  // for (byte i = 0; i < 8; i++){
+  //   b = String(addr[i], HEX);
+  //   if (addr[i] < 16)	b = "0" + b;
+  //   rez += b;
+  //   if (i<7) rez += ":";
+  // }
+  // return rez;
+
+//   float var;
+// char buffer[4];
+// ...
+// CopyMemory(&var, buffer, 4);
 }
