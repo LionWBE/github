@@ -98,6 +98,7 @@ static const uint8_t PROGMEM _ds_crc8_table[] = {
 // uint8_t _empDsAddr[1] = {1};
 #pragma GCC diagnostic pop
 // #define DS_ADDR_MODE _empDsAddr
+#define DS_ADDR_MODE {1}
 
 // ====================== CLASS ======================
 // template <uint8_t DS_PIN, uint8_t *DS_ADDR = (uint8_t*)nullptr, uint8_t DS_AM = 1, bool DS_PGM = 0>
@@ -124,16 +125,16 @@ public:
         return val;
     }
 
-    // MicroDS18B20() {
-    //     pinMode(DS_PIN, INPUT);
-    //     digitalWrite(DS_PIN, LOW);
-    //     t1.time_delay_const = 500;
-    //     t1.start();
-    // }
+    MicroDS18B20() {
+        pinMode(DS_PIN, INPUT);
+        digitalWrite(DS_PIN, LOW);
+        t1.time_delay_const = 500;
+        t1.start();
+    }
 
-    void setting(uint8_t in_DS_PIN, uint8_t *in_DS_ADDR = (uint8_t*)nullptr, uint8_t in_DS_AM = 1, bool in_DS_PGM = 0){
+    void setting(uint8_t in_DS_PIN, uint8_t in_DS_ADDR, uint8_t in_DS_AM = 1, bool in_DS_PGM = 0){
         DS_PIN = DS_PIN;
-        DS_ADDR = in_DS_ADDR;
+        DS_ADDR = & in_DS_ADDR;
         DS_AM = in_DS_AM;
         DS_PGM = in_DS_PGM;
         

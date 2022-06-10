@@ -17,7 +17,7 @@ MyClass_timer t_cicle;
 MyClass_timer t_print_temp;
 
 iarduino_I2C_connect I2C2;                            // объявляем переменную для работы c библиотекой iarduino_I2C_connect
-byte REG_Array[200];                            // объявляем массив, данные которого будут доступны для чтения/записи по шине I2C
+byte REG_Array[40];                                   // объявляем массив, данные которого будут доступны для чтения/записи по шине I2C
 // 0    - КОЛИЧЕСТВО ДАТЧИКОВ
 // 1    - количество циклов в секунду
 // 1-8  - АДРЕС ПЕРВОГО ДАТЧИКА
@@ -72,7 +72,7 @@ void setup(){
   t_print_temp.time_delay_const = 500;
   t_print_temp.start();   
 
-  Wire.begin(0x01);                                   // инициируем подключение к шине I2C в качестве ведомого (slave) устройства, с указанием своего адреса на шине.
+  Wire.begin(0x11);                                   // инициируем подключение к шине I2C в качестве ведомого (slave) устройства, с указанием своего адреса на шине.
   I2C2.begin(REG_Array);                              // инициируем возможность чтения/записи данных по шине I2C, из/в указываемый массив  
   REG_Array[0] = byte(countSensors);
 }
@@ -118,10 +118,14 @@ void loop(){
     }
 
     for (int i = 0; i < 28; i++) {
-      Serial.print("REG[]");
+      Serial.print("REG[");
+      Serial.print(i);
+      Serial.print("] = ");
       Serial.println(REG_Array[i]);
     }
     Serial.println();
+    Serial.print("REG[30] = ");
+    Serial.println(REG_Array[30]);
   }
 }
 // ************************************************************************************************************
@@ -133,7 +137,8 @@ void loop(){
 // 27   - НАЛИЧИЕ СВЯЗИ С ДАТЧИКОМ
 void copy_data_to_REG(byte n){   // n - number or device
   byte a[4];
-  byte start = n * 13;
+  byte start1 = n * 13;  // количество сигналов на датчик температуры и номер датчика
+  byte start2 = 2;       // количество сигналов до датчиков температуры
   float_to_4_byte(temperature[n], a);
   bool c;
   if (temperature[n] == -127){
@@ -141,17 +146,17 @@ void copy_data_to_REG(byte n){   // n - number or device
   } else{
     c = true;
   }
-  REG_Array[start + 2] = sensorsUnique[n][0];
-  REG_Array[start + 3] = sensorsUnique[n][1];
-  REG_Array[start + 4] = sensorsUnique[n][2];
-  REG_Array[start + 5] = sensorsUnique[n][3];
-  REG_Array[start + 6] = sensorsUnique[n][4];
-  REG_Array[start + 7] = sensorsUnique[n][5];
-  REG_Array[start + 8] = sensorsUnique[n][6];
-  REG_Array[start + 9] = sensorsUnique[n][7];
-  REG_Array[start + 10] = a[0];
-  REG_Array[start + 11] = a[0];
-  REG_Array[start + 12] = a[0];
-  REG_Array[start + 13] = a[0];
-  REG_Array[start + 14] = byte(c);
+  REG_Array[start1 + start2 + 0] = sensorsUnique[n][0];
+  REG_Array[start1 + start2 + 1] = sensorsUnique[n][1];
+  REG_Array[start1 + start2 + 2] = sensorsUnique[n][2];
+  REG_Array[start1 + start2 + 3] = sensorsUnique[n][3];
+  REG_Array[start1 + start2 + 4] = sensorsUnique[n][4];
+  REG_Array[start1 + start2 + 5] = sensorsUnique[n][5];
+  REG_Array[start1 + start2 + 6] = sensorsUnique[n][6];
+  REG_Array[start1 + start2 + 7] = sensorsUnique[n][7];
+  REG_Array[start1 + start2 + 8] = a[0];
+  REG_Array[start1 + start2 + 9] = a[1];
+  REG_Array[start1 + start2 + 10] = a[2];
+  REG_Array[start1 + start2 + 11] = a[3];
+  REG_Array[start1 + start2 + 12] = byte(c);
 }
