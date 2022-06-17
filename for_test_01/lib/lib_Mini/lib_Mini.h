@@ -13,5 +13,7 @@
     char* create_char_array_from_string(String str);
     void addr_string_to_byte(String str_addr, byte *byte_addr);
     String addr_char_to_string(byte *addr);
-    void float_to_4_byte(float fval, byte *bval);
+    void float_to_2byte(float fval, byte *bval);
+    float four_byte_to_float(byte *bval);
+    byte Compute_CRC8(byte *bytes, int len);
 #endif

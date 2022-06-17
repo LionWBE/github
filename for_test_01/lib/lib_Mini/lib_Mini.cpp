@@ -60,22 +60,31 @@ String addr_char_to_string(byte *addr){
   return rez;
 }
 // ************************************************************************************************************
-void float_to_4_byte(float fval, byte *bval){
-  // fval
-  // byte a;
-  memcpy(bval, &fval, 4);
-  // String rez = "";
-  // String b;
-  // for (byte i = 0; i < 8; i++){
-  //   b = String(addr[i], HEX);
-  //   if (addr[i] < 16)	b = "0" + b;
-  //   rez += b;
-  //   if (i<7) rez += ":";
-  // }
-  // return rez;
-
-//   float var;
-// char buffer[4];
-// ...
-// CopyMemory(&var, buffer, 4);
+void float_to_2byte(float fval, byte *bval){
+  // memcpy(bval, &fval, 4);
+  bval[0] = int(fval);
+  bval[1] = int((fval - bval[0])*100);
+}
+// ************************************************************************************************************
+float four_byte_to_float(byte *bval){
+  float rez;
+  memcpy(&rez, bval, 4);
+  return rez;
+}
+// **************************************************************************************************************
+byte Compute_CRC8(byte *bytes, int len) {
+  const byte generator = B00101111;   // polynomial = x^8 + x^5 + x^3 + x^2 + x + 1 (ignore MSB which is always 1)
+  byte crc = 0;
+  while (len--){
+    crc ^= *bytes++; /* XOR-in the next input byte */
+    for (int i = 0; i < 8; i++){
+      if ((crc & 0x80) != 0){
+        crc = (byte)((crc << 1) ^ generator);
+      }
+      else{
+        crc <<= 1;
+      }
+    }
+  }
+  return crc;
 }
