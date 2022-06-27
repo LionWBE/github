@@ -16,6 +16,7 @@
 class MyClass_JSON {
   public:
     void loadConfiguration(const char *, MyClass_Config *);
+    bool error_load_config;
   private:
 };
 #endif

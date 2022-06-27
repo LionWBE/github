@@ -1,0 +1,1 @@
+{"PCF8575": {"Col": "2", "board": [{"I2C_adr": "32", "Type": "DI"}, {"I2C_adr": "33", "Type": "DO"}]}}

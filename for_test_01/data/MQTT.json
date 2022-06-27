@@ -1,0 +1,1 @@
+{"MQTT": {"Enable": true, "Server": "192.168.0.103", "Port": "1883", "Login": "admin", "Home_topic": "SmartHOME/ESP_1/", "Password": "admin123"}}

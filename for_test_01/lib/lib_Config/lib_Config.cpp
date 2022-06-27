@@ -2,13 +2,14 @@
 //-----------------(методы класса MyClass_WiFi)--------------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------
 void MyClass_Config::print(){
-  print_WiFi(config.WiFi,3);
-  print_PCF8575(config.PCF8575,3);
-  print_MQTT(config.MQTT,3);
-  print_FTP(config.FTP,3);
+  print_WiFi(config.WiFi, 3);
+  print_PCF8575(config.PCF8575, 3);
+  print_MQTT(config.MQTT, 3);
+  print_FTP(config.FTP, 3);
   print_DIs(config.DIs, 3);
-  print_NTP(config.NTP,3);
-  print_DS18B20(config.DS18B20,3);
+  print_DOs(config.DOs, 3);
+  print_NTP(config.NTP, 3);
+  print_DS18B20(config.DS18B20, 3);
 }
 //-------------------------------------------------------------------------------------------------------------------------------------
 void MyClass_Config::print_DIs(MyStruct_DIs DIs, byte k){
@@ -25,6 +26,22 @@ void MyClass_Config::print_DI(MyStruct_DI DI, byte k){
   print_param("Description", DI.Description, k+3);
   print_PCF8575_adr(DI.PCF8575_adr, k+3);
   print_MQTT_out(DI.MQTT_out,k+3);
+}
+//-------------------------------------------------------------------------------------------------------------------------------------
+void MyClass_Config::print_DOs(MyStruct_DOs DOs, byte k){
+  print_param("DOs", k);
+  print_param("col", DOs.col, k+3);
+  for (byte i = 0; i < DOs.col; i++) {
+    print_DO(DOs.DO[i], k+3);
+  }
+}
+//-------------------------------------------------------------------------------------------------------------------------------------
+void MyClass_Config::print_DO(MyStruct_DO DO, byte k){
+  print_param("DO", k);
+  print_param("Type", DO.Type, k+3);
+  print_param("Description", DO.Description, k+3);
+  print_PCF8575_adr(DO.PCF8575_adr, k+3);
+  print_MQTT_out(DO.MQTT_out,k+3);
 }
 //-------------------------------------------------------------------------------------------------------------------------------------
 void MyClass_Config::print_PCF8575_adr(MyStruct_PCF8575_adr PCF8575_adr, byte k){

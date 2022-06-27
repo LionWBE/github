@@ -1,0 +1,1 @@
+{"DS18B20": {"Col": "1", "sensors": [{"address": "28FF641E843EB9C8", "Description": "Дом, зал, температура воздуха", "MQTT_out": {"Enable": true, "Col": "1", "topic": ["SmartHOME/home/temper/sensor1"]}}]}}

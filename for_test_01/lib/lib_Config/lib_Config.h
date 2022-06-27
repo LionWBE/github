@@ -56,6 +56,7 @@ struct MyStruct_board_PCF8575 {
 //********************************
 struct MyStruct_DI {
   byte Type; // 1 - inner_SPI, 2 - 
+  byte Val; // 1 - inner_SPI, 2 - 
   String Description;
   MyStruct_PCF8575_adr PCF8575_adr;
   MyStruct_MQTT_out MQTT_out;
@@ -67,6 +68,22 @@ struct MyStruct_DIs {
   byte col; 
   MyStruct_DI *DI;
 };
+//********************************
+struct MyStruct_DO {
+  byte Type; // 1 - inner_SPI, 2 - 
+  byte Cmd; 
+  String Description;
+  MyStruct_PCF8575_adr PCF8575_adr;
+  MyStruct_MQTT_out MQTT_out;
+  MyStruct_MQTT_in MQTT_in;
+  MyStruct_Time_setting Time_setting;
+};
+//********************************
+struct MyStruct_DOs {
+  byte col; 
+  MyStruct_DO *DO;
+};
+//********************************
 struct MyStruct_PCF8575 {
   byte col;
   MyStruct_board_PCF8575 *board;
@@ -85,6 +102,7 @@ struct MyStruct_DS18B20 {
 //********************************
 struct MyStruct_Config {
   MyStruct_DIs DIs;
+  MyStruct_DOs DOs;
   MyStruct_WiFi WiFi;
   MyStruct_MQTT MQTT;
   MyStruct_FTP FTP;
@@ -114,6 +132,8 @@ class MyClass_Config {
   private:
     void print_DIs(MyStruct_DIs, byte);
     void print_DI(MyStruct_DI, byte);
+    void print_DOs(MyStruct_DOs, byte);
+    void print_DO(MyStruct_DO, byte);  
     void print_PCF8575_adr(MyStruct_PCF8575_adr, byte);
     void print_MQTT_out(MyStruct_MQTT_out , byte);
     void print_MQTT(MyStruct_MQTT , byte);
