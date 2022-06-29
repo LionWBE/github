@@ -40,7 +40,7 @@
     "sensors": [
       {
         "address": "28FF641E843EB9C8",
-        "Description": "Дом, зал, температура воздуха",
+        "Description": "home, hall, temperature",
         "MQTT_out": {
           "Enable": true,
           "Col": "1",
@@ -56,7 +56,7 @@
     "DI": [
       {
         "Type": "inner_PCF8575",
-        "Description": "Дом, положение физического выключателя света в туалете",
+        "Description": "home, switch position, ligth in toulet",
         "PCF8575": {
           "board_num": "0",
           "input_num": "1"
@@ -79,7 +79,7 @@
       },
       {
         "Type": "inner_PCF8575",
-        "Description": "Дом, положение физического выключателя света в ванной",
+        "Description": "home, switch position, ligth in bathroom",
         "PCF8575": {
           "board_num": "0",
           "input_num": "7"
@@ -107,7 +107,7 @@
     "DO": [
       {
         "Type": "inner_PCF8575",
-        "Description": "Cвет в туалете #1",
+        "Description": "home, reley, ligth in room #1",
         "PCF8575": {
           "board_num": "1",
           "input_num": "0"
@@ -130,7 +130,7 @@
       },
       {
         "Type": "inner_PCF8575",
-        "Description": "Cвет в туалете #2",
+        "Description": "home, reley, ligth in room #2",
         "PCF8575": {
           "board_num": "1",
           "input_num": "1"
@@ -153,7 +153,7 @@
       },
       {
         "Type": "inner_PCF8575",
-        "Description": "Cвет в туалете #2",
+        "Description": "home, reley, ligth in room #3",
         "PCF8575": {
           "board_num": "1",
           "input_num": "0"
@@ -176,7 +176,7 @@
       },
       {
         "Type": "inner_PCF8575",
-        "Description": "Cвет в туалете #3",
+        "Description": "home, reley, ligth in room #4",
         "PCF8575": {
           "board_num": "1",
           "input_num": "0"
@@ -199,7 +199,7 @@
       },
       {
         "Type": "inner_PCF8575",
-        "Description": "Cвет в туалете #4",
+        "Description": "home, reley, ligth in room #5",
         "PCF8575": {
           "board_num": "1",
           "input_num": "0"
@@ -222,7 +222,7 @@
       },
       {
         "Type": "inner_PCF8575",
-        "Description": "Cвет в туалете #5",
+        "Description": "home, reley, ligth in room #6",
         "PCF8575": {
           "board_num": "1",
           "input_num": "0"
@@ -245,7 +245,7 @@
       },
       {
         "Type": "inner_PCF8575",
-        "Description": "Cвет в туалете #6",
+        "Description": "home, reley, ligth in room #7",
         "PCF8575": {
           "board_num": "1",
           "input_num": "0"
@@ -268,7 +268,7 @@
       },
       {
         "Type": "inner_PCF8575",
-        "Description": "Cвет в ванной #1",
+        "Description": "home, reley, ligth in room #8",
         "PCF8575": {
           "board_num": "0",
           "input_num": "1"

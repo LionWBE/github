@@ -1,45 +1,192 @@
 #include "lib_JSON.h"
-//-----------------(методы класса MyClass_WiFi)--------------------------------------------------------------------------------------------------------------------
+// есть проблема с большими файлами (более 2048 байт) - не хватает буфера для чтения, при увеличении буфера появляется ошибка загрузки
+// поэтому было решено разделить файлы JSON на мелкие до 2048 байт
+// 
+//-----------------(методы класса MyClass_JSON)----------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------
 void MyClass_JSON::loadConfiguration(const char *filename, MyClass_Config *my_config) {
   SPIFFS.begin();
-
   Serial.println(F("Loading configuration..."));
   File file = SPIFFS.open(filename,"r");
-  
-  StaticJsonDocument<2048> doc;
+  DynamicJsonDocument doc(2048);
   DeserializationError error = deserializeJson(doc, file);
+  Serial.print("Read file ");
+  Serial.print(filename);
   if (error){
-    Serial.println(F("Failed to read file"));
-    error_load_config = false;
-  }else{
+    Serial.println(" - ERROR");
     error_load_config = true;
+  }else{
+    Serial.println(" - OK");
+    error_load_config = false;
+  }
+  file.close();
+  
+  if (!error_load_config){
+    byte n1, n2, n3;
+    String s;
+    s = "/" + doc["WiFi"].as<String>();
+    Config_WiFi(s.c_str(), my_config);
+    s = "/" + doc["NTP"].as<String>();
+    Config_NTP(s.c_str(), my_config);
+    s = "/" + doc["FTP"].as<String>();
+    Config_FTP(s.c_str(), my_config);
+    s = "/" + doc["MQTT"].as<String>();
+    Config_MQTT(s.c_str(), my_config);
+    s = "/" + doc["PCF8575"].as<String>();
+    Config_PCF8575(s.c_str(), my_config);
+    s = "/" + doc["DS18B20"].as<String>();
+    Config_DS18B20(s.c_str(), my_config);
+
+    n1 = doc["DOs"]["Col"].as<byte>();
+    n2 = doc["DOs"]["ColJSON"].as<byte>();
+    n3 = 0; // позиция старта
+    my_config->config.DOs.col = n1;
+    my_config->config.DOs.DO = new MyStruct_DO[n1];    
+    for (byte a=0; a<n2; a++){
+      s = "/" + doc["DOs"]["file"][a].as<String>();
+      n3 = Config_DOs(s.c_str(), my_config, n3);
+    }   
+
+    n1 = doc["DIs"]["Col"].as<byte>();
+    n2 = doc["DIs"]["ColJSON"].as<byte>();
+    n3 = 0; // позиция старта
+    my_config->config.DIs.col = n1;
+    my_config->config.DIs.DI = new MyStruct_DI[n1];    
+    for (byte a=0; a<n2; a++){
+      s = "/" + doc["DIs"]["file"][a].as<String>();
+      n3 = Config_DIs(s.c_str(), my_config, n3);
+    }
+
+  }
+  SPIFFS.end();
+}
+//-----------------(методы класса MyClass_JSON)----------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------
+void MyClass_JSON::Config_WiFi(const char *filename, MyClass_Config *my_config){
+  File file = SPIFFS.open(filename,"r");
+  DynamicJsonDocument doc(2048);
+  DeserializationError error = deserializeJson(doc, file);
+  Serial.print("Read file ");
+  Serial.print(filename);
+  if (error){
+    Serial.println(" - ERROR");
+    error_load_config = true;
+  }else{
+    Serial.println(" - OK");
+    error_load_config = false;
   }
   file.close();
 
-  if (error_load_config){
+  if (!error_load_config){
     byte i1,n1,i2,n2,s1;
     String s;
-    //**********************************(WiFi)**************************************************
     my_config->config.WiFi.Enable = doc["WiFi"]["Enable"].as<bool>();
     my_config->config.WiFi.Password = doc["WiFi"]["Password"].as<String>();
-    my_config->config.WiFi.SSID = doc["WiFi"]["SSID"].as<String>();
-    //**********************************(NTP)**************************************************
+    my_config->config.WiFi.SSID = doc["WiFi"]["SSID"].as<String>(); 
+  }
+  doc.clear();
+}
+//-----------------(методы класса MyClass_JSON)----------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------
+void MyClass_JSON::Config_NTP(const char *filename, MyClass_Config *my_config){
+  File file = SPIFFS.open(filename,"r");
+  DynamicJsonDocument doc(2048);
+  DeserializationError error = deserializeJson(doc, file);
+  Serial.print("Read file ");
+  Serial.print(filename);
+  if (error){
+    Serial.println(" - ERROR");
+    error_load_config = true;
+  }else{
+    Serial.println(" - OK");
+    error_load_config = false;
+  }
+  file.close();
+
+  if (!error_load_config){
+    byte i1,n1,i2,n2,s1;
+    String s;    
     my_config->config.NTP.Enable = doc["NTP"]["Enable"].as<bool>();
     my_config->config.NTP.Server = doc["NTP"]["Server"].as<String>();
     my_config->config.NTP.offset = doc["NTP"]["Offset"].as<unsigned int>();
-    //**********************************(FTP)**************************************************
+  }
+  doc.clear();
+}
+//-----------------(методы класса MyClass_JSON)----------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------
+void MyClass_JSON::Config_FTP(const char *filename, MyClass_Config *my_config){
+  File file = SPIFFS.open(filename,"r");
+  DynamicJsonDocument doc(2048);
+  DeserializationError error = deserializeJson(doc, file);
+  Serial.print("Read file ");
+  Serial.print(filename);
+  if (error){
+    Serial.println(" - ERROR");
+    error_load_config = true;
+  }else{
+    Serial.println(" - OK");
+    error_load_config = false;
+  }
+  file.close();
+
+  if (!error_load_config){
+    byte i1,n1,i2,n2,s1;
+    String s;    
     my_config->config.FTP.Enable = doc["FTP"]["Enable"].as<bool>();
     my_config->config.FTP.Password = doc["FTP"]["Password"].as<String>();
     my_config->config.FTP.Login = doc["FTP"]["Login"].as<String>();
-    //**********************************(MQTT)**************************************************
+  }
+  doc.clear();
+}
+//-----------------(методы класса MyClass_JSON)----------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------
+void MyClass_JSON::Config_MQTT(const char *filename, MyClass_Config *my_config){
+  File file = SPIFFS.open(filename,"r");
+  DynamicJsonDocument doc(2048);
+  DeserializationError error = deserializeJson(doc, file);
+  Serial.print("Read file ");
+  Serial.print(filename);
+  if (error){
+    Serial.println(" - ERROR");
+    error_load_config = true;
+  }else{
+    Serial.println(" - OK");
+    error_load_config = false;
+  }
+  file.close();
+
+  if (!error_load_config){
+    byte i1,n1,i2,n2,s1;
+    String s;    
     my_config->config.MQTT.Enable = doc["MQTT"]["Enable"].as<bool>();
     my_config->config.MQTT.Password = doc["MQTT"]["Password"].as<String>();
     my_config->config.MQTT.Login = doc["MQTT"]["Login"].as<String>();
     my_config->config.MQTT.Home_topic = doc["MQTT"]["Home_topic"].as<String>();
     my_config->config.MQTT.port = doc["MQTT"]["Port"].as<unsigned int>();
     my_config->config.MQTT.Server = doc["MQTT"]["Server"].as<String>();
-    //**********************************(PCF8575)**************************************************
+  }
+  doc.clear();
+}
+//-----------------(методы класса MyClass_JSON)----------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------
+void MyClass_JSON::Config_PCF8575(const char *filename, MyClass_Config *my_config){
+  File file = SPIFFS.open(filename,"r");
+  DynamicJsonDocument doc(2048);
+  DeserializationError error = deserializeJson(doc, file);
+  Serial.print("Read file ");
+  Serial.print(filename);
+  if (error){
+    Serial.println(" - ERROR");
+    error_load_config = true;
+  }else{
+    Serial.println(" - OK");
+    error_load_config = false;
+  }
+  file.close();
+
+  if (!error_load_config){
+    byte i1,n1,i2,n2,s1;
+    String s;    
     my_config->config.PCF8575.col = doc["PCF8575"]["Col"].as<unsigned char>();
     n1 = my_config->config.PCF8575.col;
     my_config->config.PCF8575.board = new MyStruct_board_PCF8575[n1];
@@ -49,49 +196,32 @@ void MyClass_JSON::loadConfiguration(const char *filename, MyClass_Config *my_co
       s = doc["PCF8575"]["board"][i1]["Type"].as<String>();
       if (s == "DI"){s1 = 1;}
       if (s == "DO"){s1 = 2;}
+      if (s == "DIO"){s1 = 3;}
       my_config->config.PCF8575.board[i1].Type = s1;
     } 
-    //**********************************(DI)**************************************************
-    my_config->config.DIs.col = doc["DIs"]["Col"].as<unsigned char>();
-    n1 = my_config->config.DIs.col;
-    my_config->config.DIs.DI = new MyStruct_DI[n1];
-    for (i1 = 0; i1<n1; i1++){
-      s = doc["DIs"]["DI"][i1]["Type"].as<String>();
-      if (s == "inner_PCF8575"){my_config->config.DIs.DI[i1].Type = 1;}
-      my_config->config.DIs.DI[i1].Description = doc["DIs"]["DI"][i1]["Description"].as<String>();
+  }
+  doc.clear();
+}
+//-----------------(методы класса MyClass_JSON)----------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------
+void MyClass_JSON::Config_DS18B20(const char *filename, MyClass_Config *my_config){
+  File file = SPIFFS.open(filename,"r");
+  DynamicJsonDocument doc(2048);
+  DeserializationError error = deserializeJson(doc, file);
+  Serial.print("Read file ");
+  Serial.print(filename);
+  if (error){
+    Serial.println(" - ERROR");
+    error_load_config = true;
+  }else{
+    Serial.println(" - OK");
+    error_load_config = false;
+  }
+  file.close();
 
-      my_config->config.DIs.DI[i1].PCF8575_adr.board_num = doc["DIs"]["DI"][i1]["PCF8575"]["board_num"].as<unsigned char>();
-      my_config->config.DIs.DI[i1].PCF8575_adr.input_num = doc["DIs"]["DI"][i1]["PCF8575"]["input_num"].as<unsigned char>();
-
-      my_config->config.DIs.DI[i1].MQTT_out.enable = doc["DIs"]["DI"][i1]["MQTT_out"]["Enable"].as<bool>();
-      my_config->config.DIs.DI[i1].MQTT_out.col = doc["DIs"]["DI"][i1]["MQTT_out"]["Col"].as<unsigned char>();
-      n2 = my_config->config.DIs.DI[i1].MQTT_out.col;
-      my_config->config.DIs.DI[i1].MQTT_out.topic = new String[n2];
-      for (i2 =0; i2<n2; i2++){ 
-        my_config->config.DIs.DI[i1].MQTT_out.topic[i2] = doc["DIs"]["DI"][i1]["MQTT_out"]["topic"][i2].as<String>();
-      }
-    }
-    //**********************************(DO)**************************************************
-    my_config->config.DOs.col = doc["DOs"]["Col"].as<unsigned char>();
-    n1 = my_config->config.DOs.col;
-    my_config->config.DOs.DO = new MyStruct_DO[n1];
-    for (i1 = 0; i1<n1; i1++){
-      s = doc["DOs"]["DO"][i1]["Type"].as<String>();
-      if (s == "inner_PCF8575"){my_config->config.DOs.DO[i1].Type = 1;}
-      my_config->config.DOs.DO[i1].Description = doc["DOs"]["DO"][i1]["Description"].as<String>();
-
-      my_config->config.DOs.DO[i1].PCF8575_adr.board_num = doc["DOs"]["DO"][i1]["PCF8575"]["board_num"].as<unsigned char>();
-      my_config->config.DOs.DO[i1].PCF8575_adr.input_num = doc["DOs"]["DO"][i1]["PCF8575"]["input_num"].as<unsigned char>();
-
-      my_config->config.DOs.DO[i1].MQTT_out.enable = doc["DOs"]["DO"][i1]["MQTT_out"]["Enable"].as<bool>();
-      my_config->config.DOs.DO[i1].MQTT_out.col = doc["DOs"]["DO"][i1]["MQTT_out"]["Col"].as<unsigned char>();
-      n2 = my_config->config.DOs.DO[i1].MQTT_out.col;
-      my_config->config.DOs.DO[i1].MQTT_out.topic = new String[n2];
-      for (i2 =0; i2<n2; i2++){ 
-        my_config->config.DOs.DO[i1].MQTT_out.topic[i2] = doc["DOs"]["DO"][i1]["MQTT_out"]["topic"][i2].as<String>();
-      }
-    }  
-    //**********************************(DS18B20)**************************************************
+  if (!error_load_config){
+    byte i1,n1,i2,n2,s1;
+    String s;    
     my_config->config.DS18B20.col = doc["DS18B20"]["Col"].as<unsigned char>();
     n1 = my_config->config.DS18B20.col;
     my_config->config.DS18B20.sensors = new MyStruct_sensor_DS18B20[n1];
@@ -107,4 +237,92 @@ void MyClass_JSON::loadConfiguration(const char *filename, MyClass_Config *my_co
       }
     } 
   }
+  doc.clear();
+}
+//-----------------(методы класса MyClass_JSON)----------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------
+byte MyClass_JSON::Config_DIs(const char *filename, MyClass_Config *my_config, byte start_num){
+  File file = SPIFFS.open(filename,"r");
+  DynamicJsonDocument doc(2048);
+  DeserializationError error = deserializeJson(doc, file);
+  Serial.print("Read file ");
+  Serial.print(filename);
+  if (error){
+    Serial.println(" - ERROR");
+    error_load_config = true;
+  }else{
+    Serial.println(" - OK");
+    error_load_config = false;
+  }
+  file.close();
+
+  byte i1,n1,i2,n2,s1,i3;
+  String s;    
+  if (!error_load_config){
+    //**********************************(DI)**************************************************
+    n1 = doc["DIs"]["Col"].as<unsigned char>();
+    for (i1 = 0; i1 < n1; i1++){
+      i3 = start_num + i1;
+      s = doc["DIs"]["DI"][i1]["Type"].as<String>();
+      if (s == "inner_PCF8575"){my_config->config.DIs.DI[i3].Type = 2;}
+      my_config->config.DIs.DI[i3].Description = doc["DIs"]["DI"][i1]["Description"].as<String>();
+
+      my_config->config.DIs.DI[i3].PCF8575_adr.board_num = doc["DIs"]["DI"][i1]["PCF8575"]["board_num"].as<unsigned char>();
+      my_config->config.DIs.DI[i3].PCF8575_adr.input_num = doc["DIs"]["DI"][i1]["PCF8575"]["input_num"].as<unsigned char>();
+
+      my_config->config.DIs.DI[i3].MQTT_out.enable = doc["DIs"]["DI"][i1]["MQTT_out"]["Enable"].as<bool>();
+      my_config->config.DIs.DI[i3].MQTT_out.col = doc["DIs"]["DI"][i1]["MQTT_out"]["Col"].as<byte>();
+      n2 = my_config->config.DIs.DI[i3].MQTT_out.col;
+      my_config->config.DIs.DI[i3].MQTT_out.topic = new String[n2];
+      for (i2 = 0; i2 < n2; i2++){ 
+        my_config->config.DIs.DI[i3].MQTT_out.topic[i2] = doc["DIs"]["DI"][i1]["MQTT_out"]["topic"][i2].as<String>();
+      }
+    }
+  }
+  doc.clear();
+  return (start_num + n1);
+}
+//-----------------(методы класса MyClass_JSON)----------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------
+byte MyClass_JSON::Config_DOs(const char *filename, MyClass_Config *my_config, byte start_num){
+  File file = SPIFFS.open(filename,"r");
+  // StaticJsonDocument<2048> doc;
+  DynamicJsonDocument doc(2048);
+  DeserializationError error = deserializeJson(doc, file);
+  Serial.print("Read file ");
+  Serial.print(filename);
+  if (error){
+    Serial.println(" - ERROR");
+    error_load_config = true;
+  }else{
+    Serial.println(" - OK");
+    error_load_config = false;
+  }
+  file.close();
+
+  byte i1,n1,i2,n2,s1,i3;
+  String s;    
+  if (!error_load_config){
+    //**********************************(DO)**************************************************
+    n1 = doc["DOs"]["Col"].as<unsigned char>();
+    for (i1 = 0; i1 < n1; i1++){
+      i3 = start_num + i1;
+      s = doc["DOs"]["DO"][i1]["Type"].as<String>();
+      if (s == "inner_PCF8575"){my_config->config.DOs.DO[i3].Type = 2;}
+      my_config->config.DOs.DO[i3].Description = doc["DOs"]["DO"][i1]["Description"].as<String>();
+
+      my_config->config.DOs.DO[i3].PCF8575_adr.board_num = doc["DOs"]["DO"][i1]["PCF8575"]["board_num"].as<unsigned char>();
+      my_config->config.DOs.DO[i3].PCF8575_adr.input_num = doc["DOs"]["DO"][i1]["PCF8575"]["input_num"].as<unsigned char>();
+
+      my_config->config.DOs.DO[i3].MQTT_out.enable = doc["DOs"]["DO"][i1]["MQTT_out"]["Enable"].as<bool>();
+      my_config->config.DOs.DO[i3].MQTT_out.col = doc["DOs"]["DO"][i1]["MQTT_out"]["Col"].as<byte>();
+      n2 = my_config->config.DOs.DO[i3].MQTT_out.col;
+      my_config->config.DOs.DO[i3].MQTT_out.topic = new String[n2];
+      for (i2 = 0; i2 < n2; i2++){ 
+        my_config->config.DOs.DO[i3].MQTT_out.topic[i2] = doc["DOs"]["DO"][i1]["MQTT_out"]["topic"][i2].as<String>();
+      }
+    }
+  }
+  doc.clear();
+  return (start_num + n1);
 }
