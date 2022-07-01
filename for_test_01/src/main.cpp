@@ -17,8 +17,10 @@ MyClass_FTP my_FTP;
 
 MyClass_timer t1;
 MyClass_timer t2;
+bool cmd_1;
 // **************************************************************************************************************
-
+bool RSTrig(byte col, bool *param);
+bool trig(byte num);
 // **************************************************************************************************************
 void setup() {
   Serial.begin(115200);
@@ -33,7 +35,7 @@ void setup() {
   my_FTP.setup();
   // delay(2000); 
 
-  // my_config.print(); 
+  my_config.print(); 
   // delay(1000);
   // my_Tags.setup(&my_config);
   my_PCF8575.setup(&my_config);
@@ -44,6 +46,7 @@ void setup() {
   t2.time_delay_const = 200;
   t2.start();  
   // delay(5000); 
+  cmd_1 = false;
 }
 // **************************************************************************************************************
 void loop() {
@@ -56,6 +59,8 @@ void loop() {
   my_PCF8575.start();
   t[1] = micros();
   
+  // my_config.config.DOs.DO[2].Cmd = trig(0); 
+
   if(t1.is_done()){
     for (int i = 0; i < 1; i++){Serial.println(t[i+1] - t[i]);}
     for (int i = 0; i < my_PCF8575.col_board; i++){
@@ -64,8 +69,20 @@ void loop() {
       Serial.print("] online = ");
       Serial.println(my_PCF8575.is_online[i]);
     }
+    // if (cmd_1){
+    //   cmd_1 = false;
+    // }else{
+    //   cmd_1 = true;
+    // }
+    // my_config.config.DOs.DO[0].Cmd = cmd_1;
+    // my_config.config.DOs.DO[1].Cmd = !cmd_1;
 
+    // Serial.print("DI [0] = ");
+    // Serial.println(my_config.config.DIs.DI[0].Val);
+    // Serial.print("DI [1] = ");
+    // Serial.println(my_config.config.DIs.DI[1].Val);
+    // Serial.print("RS_Trig = ");
+    // Serial.println(my_config.config.DOs.DO[2].Cmd);
   }
-  
+
 }
-// **************************************************************************************************************

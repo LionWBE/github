@@ -21,9 +21,9 @@ class MyClass_PCF8575_DI {
     void setup(MyClass_Config*);
     bool is_enable;
     bool val_curr;                  // текущее состояние
+    bool is_set_val_curr;           // бит = 1 когда состояние установившееся
   private:
     bool val_prev;                  // предыдущее состояние
-    bool is_set_val_curr;           // бит = 1 когда состояние установившееся
     bool is_set_val_prev;           // бит = 1 когда состояние установившееся
     bool is_first_start;            // бит = 1 при первом запуске
     bool is_bounce;                 // идет процесс устранения дребезга 

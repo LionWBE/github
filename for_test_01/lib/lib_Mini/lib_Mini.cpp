@@ -88,3 +88,36 @@ byte Compute_CRC8(byte *bytes, int len) {
   }
   return crc;
 }
+// **************************************************************************************************************
+bool RSTrig_calc(byte col, bool *param){
+  byte val = 0;
+  byte a;
+  for (byte i = 0; i < col; i++){
+    if (param[i]){
+      a = 1;
+    }else{
+      a = 0;
+    }
+    val += a;
+  }
+  if (val % 2 == 0){
+    return false;
+  }else{
+    return true;
+  }
+}
+// **************************************************************************************************************
+bool RSTrig(MyClass_Config *my_config, byte num){
+  bool *mas, rez;
+  byte n, m;
+
+  n = my_config->config.Trigers.Trigers[num].col;
+  mas = new bool[n];
+  for (byte i = 0; i < n; i++){
+    m = my_config->config.Trigers.Trigers[num].DI[i];  // номер DI
+    mas[i] = my_config->config.DIs.DI[m].Val;          // значение DI   
+  }
+  rez = RSTrig_calc(n, mas); 
+  delete mas;
+  return rez;  
+}

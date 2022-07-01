@@ -1,4 +1,4 @@
-//version 0.15
+//version 0.16
 #include "lib_PCF8575.h"
 //-----------------(методы класса MyClass_PCF8575)---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -41,6 +41,7 @@ void MyClass_PCF8575::setup_DI_one(byte i, byte num_board){
   DO[i].is_enable = false;
   board.pinMode(uint8_t(i), INPUT);
   DI[i].setup(settings);
+  link_to_DI_in_config[i] = -1; 
   for (byte j = 0; j < settings->config.DIs.col; j++) {
     if (num_board == settings->config.DIs.DI[j].PCF8575_adr.board_num){
       if (i == settings->config.DIs.DI[j].PCF8575_adr.input_num){
@@ -60,6 +61,7 @@ void MyClass_PCF8575::setup_DO_one(byte i, byte num_board){
   DO[i].is_enable = true;
   board.pinMode(i, OUTPUT);
   DO[i].setup(settings);
+  link_to_DO_in_config[i] = -1; 
   for (byte j = 0; j < settings->config.DOs.col; j++) {
     if (num_board == settings->config.DOs.DO[j].PCF8575_adr.board_num){
       if (i == settings->config.DOs.DO[j].PCF8575_adr.input_num){
@@ -74,15 +76,23 @@ void MyClass_PCF8575::setup_DO_one(byte i, byte num_board){
 //-----------------(методы класса MyClass_PCF8575)---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
 void MyClass_PCF8575::start(byte num_board){
-  byte state;
 
   for (byte i = 0; i < 16; i++){ // 292 mks
     if (DI[i].is_enable){
       read_state_one_DI(i);
     } 
     if (DO[i].is_enable){
-      state = settings->config.DOs.DO[link_to_DO_in_config[i]].Cmd;
-      write_state_one_DO(i, state);
+      // state = settings->config.DOs.DO[link_to_DO_in_config[i]].Cmd;
+      bool enable = settings->config.DOs.DO[link_to_DO_in_config[i]].LinkTo.Enable;
+      if (enable){
+        byte type = settings->config.DOs.DO[link_to_DO_in_config[i]].LinkTo.type;
+        byte link = settings->config.DOs.DO[link_to_DO_in_config[i]].LinkTo.link;
+        byte state = 0;
+        if (type == 1){
+          state = RSTrig(settings, link);
+        }
+        write_state_one_DO(i, state);
+      }
     }
   }
   for (byte i = 0; i < 16; i++){ // 292 mks
@@ -105,6 +115,10 @@ void MyClass_PCF8575::read_state_one_DI(byte i){// 7390 mks
   if (b2 == 0){b1 = false;}
   if (b2 == 1){b1 = true;}
   DI[i].debounce(b1);
+
+  if (DI[i].is_set_val_curr){
+    settings->config.DIs.DI[link_to_DI_in_config[i]].Val = DI[i].val_curr;
+  }
 }
 //-----------------(методы класса MyClass_PCF8575)---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------

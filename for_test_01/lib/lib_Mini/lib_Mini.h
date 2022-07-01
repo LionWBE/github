@@ -1,6 +1,7 @@
 //version 0.12
 #ifndef lib_Mini_h
 #define lib_Mini_h
+#include <lib_Config.h>
 
 #if defined(ARDUINO) && ARDUINO >= 100
 #include "Arduino.h"
@@ -16,4 +17,6 @@
     void float_to_2byte(float fval, byte *bval);
     float four_byte_to_float(byte *bval);
     byte Compute_CRC8(byte *bytes, int len);
+    bool RSTrig_calc(byte col, bool *param);
+    bool RSTrig(MyClass_Config *my_config, byte num);
 #endif

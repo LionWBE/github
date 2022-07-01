@@ -1,3 +1,4 @@
+//version 0.13 01/07/2022
 #include "lib_Config.h"
 //-----------------(методы класса MyClass_WiFi)--------------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------
@@ -10,6 +11,7 @@ void MyClass_Config::print(){
   print_DOs(config.DOs, 3);
   print_NTP(config.NTP, 3);
   print_DS18B20(config.DS18B20, 3);
+  print_RS_Trigers(config.Trigers, 3);
 }
 //-------------------------------------------------------------------------------------------------------------------------------------
 void MyClass_Config::print_DIs(MyStruct_DIs DIs, byte k){
@@ -26,6 +28,7 @@ void MyClass_Config::print_DI(MyStruct_DI DI, byte k){
   print_param("Description", DI.Description, k+3);
   print_PCF8575_adr(DI.PCF8575_adr, k+3);
   print_MQTT_out(DI.MQTT_out,k+3);
+  print_MQTT_in(DI.MQTT_in,k+3);
 }
 //-------------------------------------------------------------------------------------------------------------------------------------
 void MyClass_Config::print_DOs(MyStruct_DOs DOs, byte k){
@@ -42,6 +45,7 @@ void MyClass_Config::print_DO(MyStruct_DO DO, byte k){
   print_param("Description", DO.Description, k+3);
   print_PCF8575_adr(DO.PCF8575_adr, k+3);
   print_MQTT_out(DO.MQTT_out,k+3);
+  print_LinkTo(DO.LinkTo,k+3);
 }
 //-------------------------------------------------------------------------------------------------------------------------------------
 void MyClass_Config::print_PCF8575_adr(MyStruct_PCF8575_adr PCF8575_adr, byte k){
@@ -57,6 +61,12 @@ void MyClass_Config::print_MQTT_out(MyStruct_MQTT_out MQTT_out, byte k){
   for(byte i=0; i<MQTT_out.col; i++){
     print_param("topic["+String(i)+"]", MQTT_out.topic[i], k+3);
   }
+}
+//-------------------------------------------------------------------------------------------------------------------------------------
+void MyClass_Config::print_MQTT_in(MyStruct_MQTT_in MQTT_in, byte k){
+  print_param("MQTT_in", k);
+  print_param("enable", MQTT_in.enable, k+3);
+  print_param("topic", MQTT_in.topic, k+3);
 }
 //-------------------------------------------------------------------------------------------------------------------------------------
 void MyClass_Config::print_WiFi(MyStruct_WiFi WiFi, byte k){
@@ -116,6 +126,30 @@ void MyClass_Config::print_sensor_DS18B20(MyStruct_sensor_DS18B20 sensor_DS18B20
   print_param("sensor_DS18B20", k);
   print_param("address", sensor_DS18B20.address, k+3);
   print_MQTT_out(sensor_DS18B20.MQTT_out,k+3);
+}
+//-------------------------------------------------------------------------------------------------------------------------------------
+void MyClass_Config::print_RS_Trigers(MyStruct_RS_Trigers Trigers, byte k){
+  print_param("RS_Trigers", k);
+  print_param("col", Trigers.col, k+3);
+  for(byte i=0; i<Trigers.col; i++){
+    print_RS_Triger(Trigers.Trigers[i], k+3);
+  }
+}
+//-------------------------------------------------------------------------------------------------------------------------------------
+void MyClass_Config::print_RS_Triger(MyStruct_RS_Triger Triger, byte k){
+  print_param("RS_Triger", k);
+  print_param("col", Triger.col, k+3);
+  print_param("Description", Triger.Description, k+3);
+  for(byte i=0; i<Triger.col; i++){
+    print_param("DI", Triger.DI[i], k+3);
+  }
+}
+//-------------------------------------------------------------------------------------------------------------------------------------
+void MyClass_Config::print_LinkTo(MyStruct_LinkTo LinkTo, byte k){
+  print_param("LinkTo", k);
+  print_param("Enable", LinkTo.Enable, k+3);
+  print_param("type", LinkTo.type, k+3);
+  print_param("link", LinkTo.link, k+3);
 }
 //-------------------------------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------

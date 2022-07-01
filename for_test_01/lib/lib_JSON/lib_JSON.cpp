@@ -36,6 +36,8 @@ void MyClass_JSON::loadConfiguration(const char *filename, MyClass_Config *my_co
     Config_PCF8575(s.c_str(), my_config);
     s = "/" + doc["DS18B20"].as<String>();
     Config_DS18B20(s.c_str(), my_config);
+    s = "/" + doc["RS_Trigers"].as<String>();
+    Config_Trigers(s.c_str(), my_config);
 
     n1 = doc["DOs"]["Col"].as<byte>();
     n2 = doc["DOs"]["ColJSON"].as<byte>();
@@ -241,6 +243,41 @@ void MyClass_JSON::Config_DS18B20(const char *filename, MyClass_Config *my_confi
 }
 //-----------------(методы класса MyClass_JSON)----------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------
+void MyClass_JSON::Config_Trigers(const char *filename, MyClass_Config *my_config){
+  File file = SPIFFS.open(filename,"r");
+  DynamicJsonDocument doc(2048);
+  DeserializationError error = deserializeJson(doc, file);
+  Serial.print("Read file ");
+  Serial.print(filename);
+  if (error){
+    Serial.println(" - ERROR");
+    error_load_config = true;
+  }else{
+    Serial.println(" - OK");
+    error_load_config = false;
+  }
+  file.close();
+
+  if (!error_load_config){
+    byte i1,n1,i2,n2,s1;
+    String s;    
+    my_config->config.Trigers.col = doc["RS_Trigers"]["Col"].as<unsigned char>();
+    n1 = my_config->config.Trigers.col;
+    my_config->config.Trigers.Trigers = new MyStruct_RS_Triger[n1];
+    for (i1 = 0; i1 < n1; i1++){
+      my_config->config.Trigers.Trigers[i1].col = doc["RS_Trigers"]["Triger"][i1]["Col"].as<byte>();
+      my_config->config.Trigers.Trigers[i1].Description = doc["RS_Trigers"]["Triger"][i1]["Description"].as<String>();
+      n2 = my_config->config.Trigers.Trigers[i1].col;
+      my_config->config.Trigers.Trigers[i1].DI = new byte[n2];
+      for (i2 =0; i2<n2; i2++){ 
+        my_config->config.Trigers.Trigers[i1].DI[i2] = doc["RS_Trigers"]["Triger"][i1]["DI"][i2].as<byte>();
+      }
+    } 
+  }
+  doc.clear();
+}
+//-----------------(методы класса MyClass_JSON)----------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------
 byte MyClass_JSON::Config_DIs(const char *filename, MyClass_Config *my_config, byte start_num){
   File file = SPIFFS.open(filename,"r");
   DynamicJsonDocument doc(2048);
@@ -265,6 +302,7 @@ byte MyClass_JSON::Config_DIs(const char *filename, MyClass_Config *my_config, b
       i3 = start_num + i1;
       s = doc["DIs"]["DI"][i1]["Type"].as<String>();
       if (s == "inner_PCF8575"){my_config->config.DIs.DI[i3].Type = 2;}
+      if (s == "external_MQTT"){my_config->config.DIs.DI[i3].Type = 3;}
       my_config->config.DIs.DI[i3].Description = doc["DIs"]["DI"][i1]["Description"].as<String>();
 
       my_config->config.DIs.DI[i3].PCF8575_adr.board_num = doc["DIs"]["DI"][i1]["PCF8575"]["board_num"].as<unsigned char>();
@@ -277,6 +315,8 @@ byte MyClass_JSON::Config_DIs(const char *filename, MyClass_Config *my_config, b
       for (i2 = 0; i2 < n2; i2++){ 
         my_config->config.DIs.DI[i3].MQTT_out.topic[i2] = doc["DIs"]["DI"][i1]["MQTT_out"]["topic"][i2].as<String>();
       }
+      my_config->config.DIs.DI[i3].MQTT_in.enable = doc["DIs"]["DI"][i1]["MQTT_in"]["Enable"].as<bool>();
+      my_config->config.DIs.DI[i3].MQTT_in.topic  = doc["DIs"]["DI"][i1]["MQTT_in"]["topic"].as<String>();
     }
   }
   doc.clear();
@@ -321,6 +361,10 @@ byte MyClass_JSON::Config_DOs(const char *filename, MyClass_Config *my_config, b
       for (i2 = 0; i2 < n2; i2++){ 
         my_config->config.DOs.DO[i3].MQTT_out.topic[i2] = doc["DOs"]["DO"][i1]["MQTT_out"]["topic"][i2].as<String>();
       }
+      my_config->config.DOs.DO[i3].LinkTo.Enable = doc["DOs"]["DO"][i1]["LinkTo"]["Enable"].as<bool>();
+      my_config->config.DOs.DO[i3].LinkTo.link = doc["DOs"]["DO"][i1]["LinkTo"]["link"].as<byte>();
+      s = doc["DOs"]["DO"][i1]["LinkTo"]["type"].as<String>();
+      if (s == "RS_Triger") my_config->config.DOs.DO[i3].LinkTo.type = 1;
     }
   }
   doc.clear();

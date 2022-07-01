@@ -1,4 +1,4 @@
-//version 0.12
+//version 0.13 01/07/2022
 #ifndef lib_Config_h
 #define lib_Config_h
 
@@ -55,8 +55,10 @@ struct MyStruct_board_PCF8575 {
 };
 //********************************
 struct MyStruct_DI {
-  byte Type; // 1 - inner_SPI, 2 - 
-  byte Val; // 1 - inner_SPI, 2 - 
+  // 2 - inner_PCF8575 
+  // 3 - external_MQTT 
+  byte Type; 
+  bool Val; // значение входа true/false
   String Description;
   MyStruct_PCF8575_adr PCF8575_adr;
   MyStruct_MQTT_out MQTT_out;
@@ -69,6 +71,12 @@ struct MyStruct_DIs {
   MyStruct_DI *DI;
 };
 //********************************
+struct MyStruct_LinkTo {
+  bool Enable;
+  byte type; // 1 - RS_Triger
+  byte link;
+};
+//********************************
 struct MyStruct_DO {
   byte Type; // 1 - inner_SPI, 2 - 
   byte Cmd; 
@@ -77,11 +85,24 @@ struct MyStruct_DO {
   MyStruct_MQTT_out MQTT_out;
   MyStruct_MQTT_in MQTT_in;
   MyStruct_Time_setting Time_setting;
+  MyStruct_LinkTo LinkTo;
 };
 //********************************
 struct MyStruct_DOs {
   byte col; 
   MyStruct_DO *DO;
+};
+//********************************
+struct MyStruct_RS_Triger {
+  bool val;              // значение итоговое
+  String Description;    // дескриптор
+  byte col;              // количество входных параметров
+  byte *DI;              // номера входных параметров (из DIs)
+};
+//********************************
+struct MyStruct_RS_Trigers {
+  byte col; 
+  MyStruct_RS_Triger *Trigers;
 };
 //********************************
 struct MyStruct_PCF8575 {
@@ -109,6 +130,7 @@ struct MyStruct_Config {
   MyStruct_NTP NTP;
   MyStruct_PCF8575 PCF8575;
   MyStruct_DS18B20 DS18B20;
+  MyStruct_RS_Trigers Trigers;
 };
 //********************************
 struct MyStruct_data{
@@ -135,8 +157,9 @@ class MyClass_Config {
     void print_DOs(MyStruct_DOs, byte);
     void print_DO(MyStruct_DO, byte);  
     void print_PCF8575_adr(MyStruct_PCF8575_adr, byte);
-    void print_MQTT_out(MyStruct_MQTT_out , byte);
-    void print_MQTT(MyStruct_MQTT , byte);
+    void print_MQTT_out(MyStruct_MQTT_out, byte);
+    void print_MQTT_in(MyStruct_MQTT_in, byte);
+    void print_MQTT(MyStruct_MQTT, byte);
     void print_WiFi(MyStruct_WiFi, byte);
     void print_NTP(MyStruct_NTP, byte);
     void print_FTP(MyStruct_FTP, byte);
@@ -144,6 +167,9 @@ class MyClass_Config {
     void print_board_PCF8575(MyStruct_board_PCF8575, byte);
     void print_sensor_DS18B20(MyStruct_sensor_DS18B20, byte);
     void print_DS18B20(MyStruct_DS18B20, byte);
+    void print_RS_Trigers(MyStruct_RS_Trigers, byte);
+    void print_RS_Triger(MyStruct_RS_Triger, byte);
+    void print_LinkTo(MyStruct_LinkTo, byte);
     void print_(byte);
     void print_param(String, String, byte);
     void print_param(String, byte, byte);

@@ -1,3 +1,4 @@
+//version 0.13
 #include "lib_MQTT.h"
 //-----------------(методы класса MyClass_MQTT)----------------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -102,4 +103,22 @@ void MyClass_MQTT::setup(MyClass_Config *my_config) {
   timer_reconect.time_delay_const = 500;
   timer_reconect.start();
   Serial.println("MyClass_MQTT setup done");
+
+  setup_DI();
+}
+//-----------------(методы класса MyClass_MQTT)----------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+void MyClass_MQTT::setup_DI(){
+  byte mas[256];
+  for (byte i = 0; i < settings->config.DIs.col; i++){
+    if (settings->config.DIs.DI[i].Type == 3){ // external_MQTT
+      mas[col_input_messange] = i;
+      col_input_messange++;
+    }
+  }
+  link_to_DI = new byte[col_input_messange];
+  for (byte i = 0; i < col_input_messange; i++){
+    link_to_DI[i] = mas[i];
+    client.subscribe(settings->config.DIs.DI[link_to_DI[i]].MQTT_in.topic.c_str());
+  }
 }

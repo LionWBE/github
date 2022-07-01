@@ -25,6 +25,7 @@ class MyClass_JSON {
     void Config_MQTT(const char *, MyClass_Config *);
     void Config_PCF8575(const char *, MyClass_Config *);
     void Config_DS18B20(const char *, MyClass_Config *);
+    void Config_Trigers(const char *, MyClass_Config *);
     byte Config_DIs(const char *, MyClass_Config *, byte);
     byte Config_DOs(const char *, MyClass_Config *, byte);
 };

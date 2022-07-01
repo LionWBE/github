@@ -1,4 +1,4 @@
-//version 0.12
+//version 0.13
 #ifndef lib_MQTT_h
 #define lib_MQTT_h
 
@@ -23,7 +23,10 @@ class MyClass_MQTT{
   private:
     void callback(char*, byte*, unsigned int);
     void reconnect();
-    
+    void setup_DI();          // для настройки входных сообщений и привязки их к DI
+    byte col_input_messange;  // количество входных сообщений
+    byte *link_to_DI;         // массив с номерами DI для входных сообщений
+
     unsigned long lastMsg = 0;
     #define MSG_BUFFER_SIZE	(50)
     char msg[MSG_BUFFER_SIZE];
