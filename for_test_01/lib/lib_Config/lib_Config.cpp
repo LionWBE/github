@@ -1,4 +1,4 @@
-//version 0.13 01/07/2022
+//version 0.14 12/07/2022
 #include "lib_Config.h"
 //-----------------(методы класса MyClass_WiFi)--------------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------
@@ -12,6 +12,15 @@ void MyClass_Config::print(){
   print_NTP(config.NTP, 3);
   print_DS18B20(config.DS18B20, 3);
   print_RS_Trigers(config.Trigers, 3);
+  print_Ethernet(config.Ethernet, 3);
+}
+//-------------------------------------------------------------------------------------------------------------------------------------
+void MyClass_Config::print_Ethernet(MyStruct_Ethernet Eternet, byte k){
+  print_param("Eternet", k);
+  print_param("enable", Eternet.enable, k+3);
+  print_param("dhcp", Eternet.dhcp, k+3);
+  print_param("mac", Eternet.mac, 6, k+3, ':');
+  print_param("ip", Eternet.ip, 4, k+3, '.');
 }
 //-------------------------------------------------------------------------------------------------------------------------------------
 void MyClass_Config::print_DIs(MyStruct_DIs DIs, byte k){
@@ -182,6 +191,16 @@ void MyClass_Config::print_param(String name_param, int val_param, byte k){
   print_(k);
   Serial.print(name_param + " = ");
   Serial.println(val_param);
+}
+//-------------------------------------------------------------------------------------------------------------------------------------
+void MyClass_Config::print_param(String name_param, byte *val_param, byte len, byte k, char separator){ 
+  print_(k);
+  Serial.print(name_param + " = ");
+  for (byte i = 0; i < len; i++){
+    Serial.print(val_param[i]);
+    if(i < len - 1) Serial.print(separator);
+  }
+  Serial.println();
 }
 //-------------------------------------------------------------------------------------------------------------------------------------
 void MyClass_Config::print_param(String name_param, byte k){

@@ -1,3 +1,4 @@
+//version 0.15 date 12/07/2022
 #include "lib_JSON.h"
 // есть проблема с большими файлами (более 2048 байт) - не хватает буфера для чтения, при увеличении буфера появляется ошибка загрузки
 // поэтому было решено разделить файлы JSON на мелкие до 2048 байт
@@ -32,6 +33,8 @@ void MyClass_JSON::loadConfiguration(const char *filename, MyClass_Config *my_co
     Config_FTP(s.c_str(), my_config);
     s = "/" + doc["MQTT"].as<String>();
     Config_MQTT(s.c_str(), my_config);
+    s = "/" + doc["Ethernet"].as<String>();
+    Config_Ethernet(s.c_str(), my_config);
     s = "/" + doc["PCF8575"].as<String>();
     Config_PCF8575(s.c_str(), my_config);
     s = "/" + doc["DS18B20"].as<String>();
@@ -166,6 +169,37 @@ void MyClass_JSON::Config_MQTT(const char *filename, MyClass_Config *my_config){
     my_config->config.MQTT.Home_topic = doc["MQTT"]["Home_topic"].as<String>();
     my_config->config.MQTT.port = doc["MQTT"]["Port"].as<unsigned int>();
     my_config->config.MQTT.Server = doc["MQTT"]["Server"].as<String>();
+  }
+  doc.clear();
+}
+//-----------------(методы класса MyClass_JSON)----------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------
+void MyClass_JSON::Config_Ethernet(const char *filename, MyClass_Config *my_config){
+  File file = SPIFFS.open(filename,"r");
+  DynamicJsonDocument doc(2048);
+  DeserializationError error = deserializeJson(doc, file);
+  Serial.print("Read file ");
+  Serial.print(filename);
+  if (error){
+    Serial.println(" - ERROR");
+    error_load_config = true;
+  }else{
+    Serial.println(" - OK");
+    error_load_config = false;
+  }
+  file.close();
+
+  if (!error_load_config){
+    byte i1,n1,i2,n2,s1;
+    String s;    
+    my_config->config.Ethernet.enable = doc["Ethernet"]["Enable"].as<bool>();
+    my_config->config.Ethernet.dhcp = doc["Ethernet"]["DHCP"].as<bool>();
+    s = doc["Ethernet"]["IP"].as<String>();
+    my_config->config.Ethernet.ip = new byte[4];
+    get_byte_ip_from_string(my_config->config.Ethernet.ip, s);
+    s = doc["Ethernet"]["MAC"].as<String>();
+    my_config->config.Ethernet.mac = new byte[6];
+    get_byte_mac_from_string(my_config->config.Ethernet.mac, s);
   }
   doc.clear();
 }

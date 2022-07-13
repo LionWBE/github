@@ -3,6 +3,7 @@
 #include <lib_Ethernet.h>
 #include <lib_JSON.h>
 #include <lib_Config.h>
+#include <lib_Mini.h>
 //************************************************************************************************************************
 MyClass_timer t1;
 MyClass_JSON my_MyClass_JSON;
@@ -18,8 +19,8 @@ void setup() {
   Serial.println();
   
   my_MyClass_JSON.loadConfiguration("/settings.json", &my_config); //загрузка конфигурации
-  my_config.print();
-  delay(10000);  
+  // my_config.print();
+  // delay(10000);  
   
   my_ethernet.setup(&my_config);
 
@@ -31,6 +32,6 @@ void setup() {
 void loop() {
   my_ethernet.start(); 
   if (t1.is_done()){
-    Serial.println("1 sec");
+    // Serial.println("1 sec");
   }
 }

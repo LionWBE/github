@@ -1,4 +1,4 @@
-//version 0.13 01/07/2022
+//version 0.14 12/07/2022
 #ifndef lib_Config_h
 #define lib_Config_h
 
@@ -105,6 +105,13 @@ struct MyStruct_RS_Trigers {
   MyStruct_RS_Triger *Trigers;
 };
 //********************************
+struct MyStruct_Ethernet {
+  bool enable;
+  bool dhcp;
+  byte *ip;
+  byte *mac;
+};
+//********************************
 struct MyStruct_PCF8575 {
   byte col;
   MyStruct_board_PCF8575 *board;
@@ -131,6 +138,7 @@ struct MyStruct_Config {
   MyStruct_PCF8575 PCF8575;
   MyStruct_DS18B20 DS18B20;
   MyStruct_RS_Trigers Trigers;
+  MyStruct_Ethernet Ethernet;
 };
 //********************************
 struct MyStruct_data{
@@ -169,12 +177,14 @@ class MyClass_Config {
     void print_DS18B20(MyStruct_DS18B20, byte);
     void print_RS_Trigers(MyStruct_RS_Trigers, byte);
     void print_RS_Triger(MyStruct_RS_Triger, byte);
+    void print_Ethernet(MyStruct_Ethernet, byte);
     void print_LinkTo(MyStruct_LinkTo, byte);
     void print_(byte);
     void print_param(String, String, byte);
     void print_param(String, byte, byte);
     void print_param(String, bool, byte);
     void print_param(String, int, byte);
+    void print_param(String, byte *, byte , byte, char);
     void print_param(String, byte);
 };
 #endif

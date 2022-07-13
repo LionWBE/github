@@ -1,4 +1,4 @@
-// 08/06/2022
+//version 0.15 date 12/07/2022
 #include "lib_Mini.h"
 //-------------------------------------------------------------------------------------------------------------------------------------
 char* create_char_array_from_string(String str){
@@ -73,19 +73,18 @@ float four_byte_to_float(byte *bval){
 }
 // **************************************************************************************************************
 byte Compute_CRC8(byte *bytes, int len) {
-  const byte generator = B00101111;   // polynomial = x^8 + x^5 + x^3 + x^2 + x + 1 (ignore MSB which is always 1)
-  byte crc = 0;
+  unsigned char crc = 0x00;
   while (len--){
-    crc ^= *bytes++; /* XOR-in the next input byte */
-    for (int i = 0; i < 8; i++){
-      if ((crc & 0x80) != 0){
-        crc = (byte)((crc << 1) ^ generator);
-      }
-      else{
-        crc <<= 1;
-      }
-    }
+      crc = crc8Table[crc ^ *bytes++];
   }
+  return crc;
+}
+// **************************************************************************************************************
+byte Compute_CRC8_for_file(byte *bytes, int len, byte crc) {
+// вычисление CRC8 суммы для массива байтов имея предыдущую сумму CRC8
+  while (len--){
+      crc = crc8Table[crc ^ *bytes++];
+  }  
   return crc;
 }
 // **************************************************************************************************************
@@ -120,4 +119,115 @@ bool RSTrig(MyClass_Config *my_config, byte num){
   rez = RSTrig_calc(n, mas); 
   delete mas;
   return rez;  
+}
+//***************************************************************************************************
+void print_free_memory(){
+  long fh = ESP.getFreeHeap();
+  Serial.println(fh);
+}  
+//***************************************************************************************************
+long get_free_memory(){
+  long fh = ESP.getFreeHeap();
+  return fh;
+}    
+//***************************************************************************************************
+void get_byte_mac_from_string(byte *byte_mac, String str_mac){
+  if (str_mac.length() > 0){
+    byte num = StrWithSeparator_GetNumSeparator(str_mac, ':');
+    String *str_mac_mas = new String[num];
+    StrWithSeparator_GetMasStr(str_mac_mas, str_mac, ':');
+    for (byte i = 0; i < num; i++){
+      byte_mac[i] = hex_to_dec(str_mac_mas[i]);
+    }
+    delete str_mac_mas;
+  }else{
+    for (byte i = 0; i < 6; i++){
+      byte_mac[i] = 0;
+    }
+  }
+}  
+//***************************************************************************************************
+void get_byte_ip_from_string(byte *byte_ip, String str_ip){
+  if (str_ip.length() > 0){
+    byte num = StrWithSeparator_GetNumSeparator(str_ip, '.');
+    String *str_ip_mas = new String[num];
+    StrWithSeparator_GetMasStr(str_ip_mas, str_ip, '.');
+    for (byte i = 0; i < num; i++){
+      byte_ip[i] = byte(str_ip_mas[i].toInt());
+    }
+    delete str_ip_mas;
+  }else{
+    for (byte i = 0; i < 4; i++){
+      byte_ip[i] = 0;
+    }
+  }
+}
+//***************************************************************************************************
+byte StrWithSeparator_GetNumSeparator(String str_in, char separator){
+  String str = str_in;
+  byte NumSeparator = 0;
+  byte index;
+  while (str.length() > 0){
+    NumSeparator++;
+    index = str.indexOf(separator);
+    if (index == -1){
+      break;
+    }
+    str = str.substring(index+1);
+  }  
+  return NumSeparator;
+}
+//***************************************************************************************************
+byte StrWithSeparator_GetMasStr(String *str_out, String str_in, char separator){
+  String str = str_in;
+  byte NumSeparator = StrWithSeparator_GetNumSeparator(str_in, separator);
+  byte StringCount = 0;
+  while (str.length() > 0){
+    byte index = str.indexOf(separator);
+    if (index == -1){
+      str_out[StringCount] = str;
+      break;
+    }else{
+      str_out[StringCount] = str.substring(0, index);
+      str = str.substring(index+1);
+    }
+    StringCount++;
+  }
+  return NumSeparator;
+}
+//***************************************************************************************************
+String StrWithSeparator_GetLastStr(String str_in, char separator){
+  String str = str_in;
+  String str_out;
+  byte NumSeparator = StrWithSeparator_GetNumSeparator(str_in, separator);
+  str_out = StrWithSeparator_GetNStr(str_in, separator, NumSeparator);
+  return str_out;
+}
+//***************************************************************************************************
+String StrWithSeparator_GetNStr(String str_in, char separator, byte num){
+  String str = str_in;
+  String str_out;
+  byte NumSeparator = StrWithSeparator_GetNumSeparator(str_in, separator);
+  byte StringCount = 0;
+  while (str.length() > 0){
+    byte index = str.indexOf(separator);
+    if (StringCount == num){
+      str_out = str.substring(0, index);
+      break;
+    }else{
+      str = str.substring(index+1);
+    }
+    StringCount++;
+  }  
+  return str_out;
+}
+//***************************************************************************************************
+String byte_mas_to_str(byte *byte_mas, uint16_t len_mas){
+  String rez = "";
+  char s;
+  for (byte i = 0; i < len_mas; i++){
+    s = byte_mas[i];
+    rez += String(s);
+  }
+  return rez;
 }

@@ -1,4 +1,4 @@
-//version 0.13 date 29/06/2022
+//version 0.15 date 12/07/2022
 #ifndef lib_JSON_h
 #define lib_JSON_h
 
@@ -12,6 +12,7 @@
 #include <SPI.h>
 #include <FS.h>
 #include <lib_Config.h>
+#include <lib_Mini.h>
 
 class MyClass_JSON {
   public:
@@ -23,6 +24,7 @@ class MyClass_JSON {
     void Config_NTP(const char *, MyClass_Config *);
     void Config_FTP(const char *, MyClass_Config *);
     void Config_MQTT(const char *, MyClass_Config *);
+    void Config_Ethernet(const char *, MyClass_Config *);
     void Config_PCF8575(const char *, MyClass_Config *);
     void Config_DS18B20(const char *, MyClass_Config *);
     void Config_Trigers(const char *, MyClass_Config *);
