@@ -4,11 +4,13 @@
 #include <lib_JSON.h>
 #include <lib_Config.h>
 #include <lib_Mini.h>
+#include <lib_FTP.h>
 //************************************************************************************************************************
 MyClass_timer t1;
 MyClass_JSON my_MyClass_JSON;
 MyClass_Config my_config;
 MyClass_Ethernet my_ethernet;
+MyClass_FTP my_FTP;
 //************************************************************************************************************************
 //************************************************************************************************************************
 //************************************************************************************************************************
@@ -17,7 +19,7 @@ MyClass_Ethernet my_ethernet;
 void setup() {
   Serial.begin(115200);
   Serial.println();
-  
+  my_FTP.setup();
   my_MyClass_JSON.loadConfiguration("/settings.json", &my_config); //загрузка конфигурации
   // my_config.print();
   // delay(10000);  
@@ -31,6 +33,7 @@ void setup() {
 //************************************************************************************************************************
 void loop() {
   my_ethernet.start(); 
+  my_FTP.start();
   if (t1.is_done()){
     // Serial.println("1 sec");
   }

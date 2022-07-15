@@ -231,3 +231,31 @@ String byte_mas_to_str(byte *byte_mas, uint16_t len_mas){
   }
   return rez;
 }
+//***************************************************************************************************
+bool is_file_exist(String full_file_name){
+  SPIFFS.begin();
+  File file = SPIFFS.open(full_file_name, "r");
+  bool rez = false;
+  if (!file) {
+    rez = false;
+  }else{
+    rez = true;
+  }
+  file.close();
+  SPIFFS.end();
+  return rez;
+}
+//***************************************************************************************************
+void is_file_exist_delete(String full_file_name){
+  SPIFFS.begin();
+  File file = SPIFFS.open(full_file_name, "r");
+  bool rez = false;
+  if (!file) {
+    rez = false;
+  }else{
+    rez = true;
+  }
+  file.close();
+  if (rez) SPIFFS.remove(full_file_name);
+  SPIFFS.end();
+}

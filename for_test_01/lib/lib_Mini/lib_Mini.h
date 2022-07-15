@@ -5,6 +5,7 @@
 
 #if defined(ARDUINO) && ARDUINO >= 100
 #include "Arduino.h"
+#include <FS.h>
 #else
 #include "WProgram.h"
 #endif
@@ -69,4 +70,7 @@
     String StrWithSeparator_GetNStr(String str_in, char separator, byte num);
     // *********************************************************************************************
     String byte_mas_to_str(byte *, uint16_t);
+    // *********************************************************************************************
+    bool is_file_exist(String full_file_name);
+    void is_file_exist_delete(String full_file_name);
 #endif

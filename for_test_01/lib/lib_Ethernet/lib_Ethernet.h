@@ -1,4 +1,4 @@
-//version 0.12 date 13/07/2022
+//version 0.13 date 15/07/2022
 #ifndef lib_Ethernet_h
 #define lib_Ethernet_h
 
@@ -16,6 +16,7 @@
 #include "lib_timer.h"
 #include "lib_Config.h"
 #include "lib_Mini.h"
+// #include <lib_FTP.h>
 
 class MyClass_Ethernet{
   public:
@@ -23,15 +24,22 @@ class MyClass_Ethernet{
     void start();
     bool enable;
   private:
+    // MyClass_FTP my_FTP;
     MyClass_Config *settings;
     const uint16_t localPort = 8888; // Local port to listen for UDP packets
     EthernetUDP udp;
     EthernetClient client;
     byte ip[4]; 
     byte mac[6]; 
-    char packetBuffer[50];
+    char *packetBuffer;
+    const byte MaxSizePacketBuffer = 200;
     MyClass_timer timer_link;
     String *MSG_LIST;    
+    
+    bool if_recieve_file;      // если правда - то выставлен режим получения файла
+    bool if_recieve_file_end;  // если правда - то выставлен режим окончания получения файла
+    byte recieve_file_crc;     // CRC сумма полученного файла (получена) для сравнения с расчитанной
+    String recieve_filename;   // имя получаемого файла
 
     void EthernetW5500_GetIpByDHCP();
     void EthernetW5500_SetIp();
@@ -43,5 +51,6 @@ class MyClass_Ethernet{
     void get_MSG_LIST(String *msg_list);
     void clear_buff(char *buf, byte col);    
     void SendFile(String file, IPAddress IP_to);
+    void RecieveFile(String recieve_filename,String msg, byte N);
 };
 #endif

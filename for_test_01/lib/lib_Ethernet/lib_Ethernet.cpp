@@ -1,4 +1,4 @@
-//version 0.12 date 13/07/2022
+//version 0.13 date 15/07/2022
 #include "lib_Ethernet.h"
 //-----------------(методы класса MyClass_Ethernet)------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------
@@ -6,6 +6,7 @@ void MyClass_Ethernet::setup(MyClass_Config *my_config){
   settings = my_config;
   enable = settings->config.Ethernet.enable;
   if(enable){
+    // my_FTP.setup();
     for(byte i = 0; i < 6; i++){
       mac[i] = settings->config.Ethernet.mac[i];
     }
@@ -26,6 +27,9 @@ void MyClass_Ethernet::setup(MyClass_Config *my_config){
     udp.begin(localPort);
     MSG_LIST = new String[10];
     get_MSG_LIST(MSG_LIST);  
+    
+    packetBuffer = new char[MaxSizePacketBuffer];
+    if_recieve_file = false;
   }
   Serial.println("MyClass_Ethernet setup done");
 }
@@ -37,7 +41,22 @@ void MyClass_Ethernet::start(){
     if (timer_link.is_done()){
       link_status();
     }  
+    // my_FTP.start();
   }
+}
+//-----------------(методы класса MyClass_Ethernet)------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------
+void MyClass_Ethernet::RecieveFile(String recieve_filename,String msg, byte N){
+  SPIFFS.begin();
+  File file = SPIFFS.open(recieve_filename, "a");  // создаем или открываем для дозаписи в конец файла
+
+  file.print(msg);
+  // file.print
+  file.close();
+  SPIFFS.end();
+// открыть для дозаписи в конец
+// после окончания приема - сравнить хэш суммы расчитанные и полученные, если норм - то пересохранить файл
+// выслать ответ о том что все норм принято или нет
 }
 //-----------------(методы класса MyClass_Ethernet)------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------
@@ -45,12 +64,11 @@ void MyClass_Ethernet::receivePacket() {
   int packetSize = udp.parsePacket();
   if (packetSize) {
     IPAddress remote_ip = udp.remoteIP();
-    clear_buff(packetBuffer, 50);
-    udp.read(packetBuffer, 50);
+    clear_buff(packetBuffer, MaxSizePacketBuffer);
+    udp.read(packetBuffer, MaxSizePacketBuffer);
     String msg = String(packetBuffer);
-    Serial.println(msg);
 
-    if(msg == MSG_LIST[0]){
+    if(msg == MSG_LIST[0]){                           // команда выслать общий отчет
       Serial.println("получена команда выслать общий отчет");
       byte col = 6;
       String *a = new String[10];
@@ -58,15 +76,47 @@ void MyClass_Ethernet::receivePacket() {
       for (byte i = 0; i < col; i++) {
         Send_UDP_Packet(remote_ip , a[i]);
       }
-    }else if(msg == MSG_LIST[1]){
+    }else if(msg == MSG_LIST[1]){                     // команда включить светодиод
       Serial.println("получена команда включить светодиод");
       digitalWrite(BUILTIN_LED, LOW);
-    }else if(msg == MSG_LIST[2]){
+    }else if(msg == MSG_LIST[2]){                     // команда выключить светодиод
       Serial.println("получена команда выключить светодиод");
       digitalWrite(BUILTIN_LED, HIGH);
-    }else if(msg == MSG_LIST[3]){
+    }else if(msg == MSG_LIST[3]){                     // команда передать свою конфигурацию
       Serial.println("получена команда передать свою конфигурацию");
       SendFile("/settings.json", remote_ip);
+    }else if(msg.startsWith(MSG_LIST[4])){            // команда передать файл
+      msg.replace(MSG_LIST[4], "");
+      String file_name = "/" + msg;
+      Serial.print("получена команда передать файл ");
+      Serial.println(file_name);
+      SendFile(file_name, remote_ip);
+    }else if(msg.startsWith(MSG_LIST[5])){            // команда СТАРТ получения файла
+      msg.replace(MSG_LIST[5], "");
+      String file_name = "/" + msg;
+      Serial.print("получена команда получить файл ");
+      Serial.println(file_name);
+      if_recieve_file = true;
+      file_name.replace(".json", "_temp.json");
+      recieve_filename = file_name;
+      is_file_exist_delete(file_name);                // удаляем старый временный файл
+    }else if(msg == MSG_LIST[6]){                     // команда REBOOT
+      Serial.println("получена команда REBOOT");
+      ESP.restart();
+    }else if(msg == MSG_LIST[7]){                     // команда завершения приема файла
+      Serial.println("получена команда завершения приема файла ");
+      if_recieve_file = false;
+      if_recieve_file_end = true;
+      recieve_filename = "";
+    }else if(msg.startsWith(MSG_LIST[8])){            // команда для сравнения CRC переданного файла
+      msg.replace(MSG_LIST[8], "");
+      recieve_file_crc = byte(msg.toInt());
+      Serial.print("получена команда для сравнения CRC переданного файла = ");
+      Serial.println(String(recieve_file_crc));
+    } else if (if_recieve_file){                      // получен фрагмент файла
+      Serial.print("получен фрагмент файла ");
+      Serial.println(msg);
+      RecieveFile(recieve_filename, msg, 0);
     }
   }
 }
@@ -86,7 +136,11 @@ void MyClass_Ethernet::get_MSG_LIST(String *msg_list){
   msg_list[1] = "ESP_" + WiFi.macAddress() + "_CMD_LED_ON";
   msg_list[2] = "ESP_" + WiFi.macAddress() + "_CMD_LED_OFF";
   msg_list[3] = "ESP_" + WiFi.macAddress() + "_CMD_GET_CONFIG";
-  // Serial.println(msg_list[0]);
+  msg_list[4] = "ESP_" + WiFi.macAddress() + "_CMD_GET_FILE_";
+  msg_list[5] = "ESP_" + WiFi.macAddress() + "_CMD_SET_FILE_";
+  msg_list[6] = "ESP_" + WiFi.macAddress() + "_CMD_REBOOT";
+  msg_list[7] = "ESP_" + WiFi.macAddress() + "_CMD_END_FILE_SET";
+  msg_list[8] = "ESP_" + WiFi.macAddress() + "_CMD_CRC_FILE_SET_";
 }
 //-----------------(методы класса MyClass_Ethernet)------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------

@@ -37,7 +37,7 @@ WiFiServer dataServer( FTP_DATA_PORT_PASV );
 void FtpServer::begin(String uname, String pword)
 {
   // Tells the ftp server to begin listening for incoming connection
-	_FTP_USER=uname;
+	_FTP_USER = uname;
 	_FTP_PASS = pword;
 
 	ftpServer.begin();
