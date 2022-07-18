@@ -1,4 +1,4 @@
-//version 0.16 date 12/07/2022
+//version 0.16 date 18/07/2022
 #ifndef lib_Mini_h
 #define lib_Mini_h
 #include <lib_Config.h>
@@ -54,6 +54,7 @@
     };
     byte Compute_CRC8(byte *bytes, int len);
     byte Compute_CRC8_for_file(byte *bytes, int len, byte crc);
+    byte Compute_CRC8_for_full_file(String file);
     // *********************************************************************************************
     bool RSTrig_calc(byte col, bool *param);
     bool RSTrig(MyClass_Config *my_config, byte num);
@@ -73,4 +74,5 @@
     // *********************************************************************************************
     bool is_file_exist(String full_file_name);
     void is_file_exist_delete(String full_file_name);
+    void file_rename(String full_file_name_old, String full_file_name_new);
 #endif

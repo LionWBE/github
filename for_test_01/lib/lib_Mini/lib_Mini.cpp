@@ -1,4 +1,4 @@
-//version 0.15 date 12/07/2022
+//version 0.16 date 18/07/2022
 #include "lib_Mini.h"
 //-------------------------------------------------------------------------------------------------------------------------------------
 char* create_char_array_from_string(String str){
@@ -257,5 +257,34 @@ void is_file_exist_delete(String full_file_name){
   }
   file.close();
   if (rez) SPIFFS.remove(full_file_name);
+  SPIFFS.end();
+}
+//***************************************************************************************************
+byte Compute_CRC8_for_full_file(String file_name){
+  char buf[100];
+  byte crc = 0;
+  SPIFFS.begin();
+  File file = SPIFFS.open(file_name, "r");
+  uint16_t len_file = file.size();
+  while(len_file > 0){
+    if(len_file > 100){
+      file.readBytes(buf, 100);
+      crc = Compute_CRC8_for_file((byte*)buf, 100, crc);
+      len_file = len_file - 100;
+    }else{
+      file.readBytes(buf, len_file);
+      crc = Compute_CRC8_for_file((byte*)buf, len_file, crc);
+      len_file = 0;
+    }
+  }
+  file.close();
+  SPIFFS.end();
+  return crc;
+}
+//***************************************************************************************************
+void file_rename(String full_file_name_old, String full_file_name_new){
+  is_file_exist_delete(full_file_name_new);
+  SPIFFS.begin();
+  SPIFFS.rename(full_file_name_old, full_file_name_new);
   SPIFFS.end();
 }
