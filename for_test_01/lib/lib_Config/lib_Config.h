@@ -1,4 +1,4 @@
-//version 0.14 12/07/2022
+//version 0.16 22/07/2022
 #ifndef lib_Config_h
 #define lib_Config_h
 
@@ -154,11 +154,27 @@ struct MyStruct_data{
   uint32_t dt[10];
 };
 //********************************
+struct MyStruct_Status{
+  String version_lib;
+  String date_lib;
+  uint32_t cicle_time;
+};
+//********************************
+struct MyStruct_ALLStatus{
+  MyStruct_Status lib_Ethernet;
+  MyStruct_Status lib_JSON;
+  MyStruct_Status lib_Config;
+  MyStruct_Status lib_Mini;
+};
+//********************************
 class MyClass_Config {
   public:
     MyStruct_Config config;
     MyStruct_data data;
+    MyStruct_ALLStatus status;
     void print();
+    void setup();
+    String GetALLStatus();
   private:
     void print_DIs(MyStruct_DIs, byte);
     void print_DI(MyStruct_DI, byte);
@@ -186,5 +202,6 @@ class MyClass_Config {
     void print_param(String, int, byte);
     void print_param(String, byte *, byte , byte, char);
     void print_param(String, byte);
+    String GetStatus(MyStruct_Status, String);
 };
 #endif

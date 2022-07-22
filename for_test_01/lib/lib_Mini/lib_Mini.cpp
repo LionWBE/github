@@ -1,5 +1,10 @@
-//version 0.16 date 18/07/2022
+//version 0.18 date 22/07/2022
 #include "lib_Mini.h"
+//-------------------------------------------------------------------------------------------------------------------------------------
+void lib_Mini_setup(MyClass_Config* settings){{
+  settings->status.lib_Mini.version_lib = "0.17";
+  settings->status.lib_Mini.date_lib = "22.07.2022";
+}}
 //-------------------------------------------------------------------------------------------------------------------------------------
 char* create_char_array_from_string(String str){
     int n = str.length()+1;
@@ -36,6 +41,13 @@ byte hex_to_dec(String hex){
         rez = rez + pow(16,(n-1)-i)*b;
     }
     return rez;
+}
+// ************************************************************************************************************
+String dec_to_hex(byte dec){
+  String s;
+  s = String(dec, HEX);
+  if (s.length() == 1) s = "0" + s;
+  return s;
 }
 // ************************************************************************************************************
 void addr_string_to_byte(String str_addr, byte *byte_addr){
@@ -83,7 +95,7 @@ byte Compute_CRC8(byte *bytes, int len) {
 byte Compute_CRC8_for_file(byte *bytes, int len, byte crc) {
 // вычисление CRC8 суммы для массива байтов имея предыдущую сумму CRC8
   while (len--){
-      crc = crc8Table[crc ^ *bytes++];
+    crc = crc8Table[crc ^ *bytes++];
   }  
   return crc;
 }
@@ -225,7 +237,7 @@ String StrWithSeparator_GetNStr(String str_in, char separator, byte num){
 String byte_mas_to_str(byte *byte_mas, uint16_t len_mas){
   String rez = "";
   char s;
-  for (byte i = 0; i < len_mas; i++){
+  for (uint16_t i = 0; i < len_mas; i++){
     s = byte_mas[i];
     rez += String(s);
   }
@@ -261,25 +273,40 @@ void is_file_exist_delete(String full_file_name){
 }
 //***************************************************************************************************
 byte Compute_CRC8_for_full_file(String file_name){
-  char buf[100];
   byte crc = 0;
   SPIFFS.begin();
   File file = SPIFFS.open(file_name, "r");
-  uint16_t len_file = file.size();
-  while(len_file > 0){
-    if(len_file > 100){
-      file.readBytes(buf, 100);
-      crc = Compute_CRC8_for_file((byte*)buf, 100, crc);
-      len_file = len_file - 100;
-    }else{
-      file.readBytes(buf, len_file);
-      crc = Compute_CRC8_for_file((byte*)buf, len_file, crc);
-      len_file = 0;
-    }
-  }
+  while (file.available()){
+    byte byte_from_file = file.read();
+    crc = crc8Table[crc ^ byte_from_file];      
+  }  
   file.close();
   SPIFFS.end();
   return crc;
+}
+//***************************************************************************************************
+size_t GetFileSize(String file_name){
+  size_t FileSize = 0;
+  SPIFFS.begin();
+  File file = SPIFFS.open(file_name, "r");
+  FileSize = file.size();
+  file.close();
+  SPIFFS.end();
+  return FileSize;
+}
+//***************************************************************************************************
+String GetFileList(){
+  SPIFFS.begin();
+  String str = "";
+  Dir dir = SPIFFS.openDir("/");
+  while (dir.next()) {
+    str += dir.fileName();
+    str += " / ";
+    str += dir.fileSize();
+    str += "\r\n";
+  }
+  SPIFFS.end();
+  return str;
 }
 //***************************************************************************************************
 void file_rename(String full_file_name_old, String full_file_name_new){

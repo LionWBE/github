@@ -6,6 +6,9 @@
 //-----------------(методы класса MyClass_JSON)----------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------
 void MyClass_JSON::loadConfiguration(const char *filename, MyClass_Config *my_config) {
+  my_config->status.lib_JSON.version_lib = "0.15";
+  my_config->status.lib_JSON.date_lib    = "12.07.2022";
+  
   SPIFFS.begin();
   Serial.println(F("Loading configuration..."));
   File file = SPIFFS.open(filename,"r");
@@ -62,8 +65,28 @@ void MyClass_JSON::loadConfiguration(const char *filename, MyClass_Config *my_co
       n3 = Config_DIs(s.c_str(), my_config, n3);
     }
 
+  }else{
+    SetDefaultConfig(my_config);
   }
   SPIFFS.end();
+}
+//-----------------(методы класса MyClass_JSON)----------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------
+void MyClass_JSON::SetDefaultConfig(MyClass_Config *my_config){
+  my_config->config.Ethernet.enable = true;
+  my_config->config.Ethernet.dhcp = true;
+  my_config->config.Ethernet.mac = new byte[6];
+  my_config->config.Ethernet.mac[0] = 0;
+  my_config->config.Ethernet.mac[1] = 1;
+  my_config->config.Ethernet.mac[2] = 2;
+  my_config->config.Ethernet.mac[3] = 3;
+  my_config->config.Ethernet.mac[4] = 4;
+  my_config->config.Ethernet.mac[5] = 5;
+  my_config->config.Ethernet.ip = new byte[4];
+  my_config->config.Ethernet.ip[0] = 0;
+  my_config->config.Ethernet.ip[1] = 0;
+  my_config->config.Ethernet.ip[2] = 0;
+  my_config->config.Ethernet.ip[3] = 0;
 }
 //-----------------(методы класса MyClass_JSON)----------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------
@@ -200,6 +223,8 @@ void MyClass_JSON::Config_Ethernet(const char *filename, MyClass_Config *my_conf
     s = doc["Ethernet"]["MAC"].as<String>();
     my_config->config.Ethernet.mac = new byte[6];
     get_byte_mac_from_string(my_config->config.Ethernet.mac, s);
+  }else{
+    SetDefaultConfig(my_config);
   }
   doc.clear();
 }

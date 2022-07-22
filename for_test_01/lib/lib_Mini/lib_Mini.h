@@ -1,4 +1,4 @@
-//version 0.16 date 18/07/2022
+//version 0.18 date 22/07/2022
 #ifndef lib_Mini_h
 #define lib_Mini_h
 #include <lib_Config.h>
@@ -9,7 +9,9 @@
 #else
 #include "WProgram.h"
 #endif
+    void lib_Mini_setup(MyClass_Config*);
     byte hex_to_dec(String hex);
+    String dec_to_hex(byte dec);
     char* cstr_and_strcpy(char *ptr_from);
     void cancat_two_char_array(char *dest, char *s1, char *s2);
     char* create_char_array_from_string(String str);
@@ -72,6 +74,8 @@
     // *********************************************************************************************
     String byte_mas_to_str(byte *, uint16_t);
     // *********************************************************************************************
+    size_t GetFileSize(String file_name);
+    String GetFileList();
     bool is_file_exist(String full_file_name);
     void is_file_exist_delete(String full_file_name);
     void file_rename(String full_file_name_old, String full_file_name_new);
