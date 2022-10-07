@@ -1,4 +1,4 @@
-//version 0.19 date 22/07/2022
+//version 0.19 date 06/10/2022
 // MISO - D6
 // MOSI - D7
 // SCS (SS) - D3, на стандартном пине D8 не работает нормально, но работает на D3 - проверено
@@ -9,8 +9,8 @@
 void MyClass_Ethernet::setup(MyClass_Config *my_config){
   settings = my_config;
   
-  settings->status.lib_Ethernet.version_lib = "0.19";
-  settings->status.lib_Ethernet.date_lib    = "22.07.2022";
+  settings->status.lib_Ethernet.version_lib = "0.20";
+  settings->status.lib_Ethernet.date_lib    = "07.10.2022";
 
   enable = settings->config.Ethernet.enable;
   debug_mode = false;
@@ -293,7 +293,7 @@ byte MyClass_Ethernet::link_status(){
 void MyClass_Ethernet::EthernetW5500_GetIpByDHCP(){
   Serial.println("Initialize Ethernet with DHCP:");
   //  Если соединение с динамической адресацией не было установлено, то
-  Ethernet.init(D3);  // на стандартном пине D8 не работает нормально, но работает на D3 - проверено
+  Ethernet.init(pinSS);  // на стандартном пине D8 не работает нормально, но работает на D3 - проверено
 
   if (Ethernet.begin(mac) == 0) {
     //  Выводим сообщение об этом в монитор последовательного порта и

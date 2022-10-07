@@ -1,4 +1,4 @@
-//version 0.18 date 22/07/2022
+//version 0.19 date 06/10/2022
 #ifndef lib_Ethernet_h
 #define lib_Ethernet_h
 
@@ -26,6 +26,8 @@ class MyClass_Ethernet{
   private:
     MyClass_Config *settings;
     const uint16_t localPort = 8888; // Local port to listen for UDP packets
+    const uint8_t pinSS = D3; // работало стабильно, но D3 нужен для прерывания INT
+    // const uint8_t pinSS = D0;  // тест
     EthernetUDP udp;
     EthernetClient client;
     IPAddress IP_debug;     // ip  адрес для отправки дебагов
