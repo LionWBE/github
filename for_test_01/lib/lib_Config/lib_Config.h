@@ -149,6 +149,7 @@ struct MyStruct_data{
   String time_stamp;
   int *MQTT;
   int *Tags;
+  int *Ethernet;
   uint16_t Tags_queue_count; // количество значений в стеке для публикации
   uint16_t Tags_count;       // количество тегов в базе
   uint32_t dt[10];
@@ -165,6 +166,7 @@ struct MyStruct_ALLStatus{
   MyStruct_Status lib_JSON;
   MyStruct_Status lib_Config;
   MyStruct_Status lib_Mini;
+  MyStruct_Status lib_PCF8575;
 };
 //********************************
 class MyClass_Config {

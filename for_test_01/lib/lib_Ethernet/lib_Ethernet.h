@@ -1,4 +1,4 @@
-//version 0.19 date 06/10/2022
+//version 0.20 date 11/10/2022
 #ifndef lib_Ethernet_h
 #define lib_Ethernet_h
 
@@ -22,6 +22,8 @@ class MyClass_Ethernet{
     void setup(MyClass_Config*);
     void start();
     void DEBAG(String packet);
+    void DEBAG(byte packet);
+    void DEBAG(String packet1, byte packet2);
     bool enable;
   private:
     MyClass_Config *settings;

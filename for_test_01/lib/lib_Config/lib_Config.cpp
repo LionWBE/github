@@ -21,6 +21,7 @@ String MyClass_Config::GetALLStatus(){
   rez += GetStatus(status.lib_JSON, "lib_JSON") + "\n";
   rez += GetStatus(status.lib_Config, "lib_Config") + "\n";
   rez += GetStatus(status.lib_Mini, "lib_Mini") + "\n";
+  rez += GetStatus(status.lib_PCF8575, "lib_PCF8575") + "\n";
   return rez;
 }
 //-----------------(методы класса MyClass_WiFi)--------------------------------------------------------------------------------------------------------------------
