@@ -1,18 +1,43 @@
-//version 0.13
+//version 0.15 date 05/07/2022
 #include "lib_MQTT.h"
+MyClass_Config *volatile global_link_to_settings;
+volatile byte *global_link_to_DI;
+volatile byte global_col_link_to_DI;
+
+volatile byte global_MQTT_in_links[10];  // номера DI (для последующей обработке вне прерывания)
+volatile bool global_MQTT_in_val[10];    // значения DI (для последующей обработке вне прерывания)
+volatile byte global_MQTT_in_col;        // количество принятых сообщений (для последующей обработке вне прерывания)
 //-----------------(методы класса MyClass_MQTT)----------------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 void MyClass_MQTT::start() {
   if (!client.connected()) {
     reconnect();
-    //client.subscribe("SmartHOME/arduino_1/counter");
-    //client.subscribe("SmartHOME/arduino_1/free_memory");
+    // client.subscribe("$SYS/broker/uptime"); // работает
+    subscribe();
   }
   client.loop();
+
+  byte col = global_MQTT_in_col;
+  for(byte i = 0; i < col; i++){
+    settings->config.DIs.DI[global_MQTT_in_links[i]].Val = global_MQTT_in_val[i];
+    global_MQTT_in_col--;
+  }
 }  
 //-----------------(методы класса MyClass_MQTT)----------------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
-void MyClass_MQTT::callback(char* topic, byte* payload, unsigned int length) {
+bool MQTT_GET_VAL_BOOL(byte* payload, unsigned int length) {
+  bool rez;
+  String s = "";
+  for (int i = 0; i < length; i++) {
+    s += String((char)payload[i]);
+  }  
+  if (s == "ON") rez = true;
+  if (s == "OFF") rez = false;
+  return rez;
+}
+//-----------------(методы класса MyClass_MQTT)----------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+void MQTT_PRINT_INPUT_MESSANGE(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message arrived [");
   Serial.print(topic);
   Serial.print("] ");
@@ -20,35 +45,26 @@ void MyClass_MQTT::callback(char* topic, byte* payload, unsigned int length) {
     Serial.print((char)payload[i]);
   }
   Serial.println();
-
-  // Switch on the LED if an 1 was received as first character
-  if ((char)payload[0] == '1') {
-    // digitalWrite(BUILTIN_LED, LOW);   // Turn the LED on (Note that LOW is the voltage level
-    // but actually the LED is on; this is because
-    // it is active low on the ESP-01)
-  } else {
-    // digitalWrite(BUILTIN_LED, HIGH);  // Turn the LED off by making the voltage HIGH
-  }
 }
 //-----------------(методы класса MyClass_MQTT)----------------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 void callback2(char* topic, byte* payload, unsigned int length) {
-  Serial.print("Message arrived [");
-  Serial.print(topic);
-  Serial.print("] ");
-  for (int i = 0; i < length; i++) {
-    Serial.print((char)payload[i]);
-  }
-  Serial.println();
-
-  // Switch on the LED if an 1 was received as first character
-  if ((char)payload[0] == '1') {
-    // digitalWrite(BUILTIN_LED, LOW);   // Turn the LED on (Note that LOW is the voltage level
-    // but actually the LED is on; this is because
-    // it is active low on the ESP-01)
-  } else {
-    // digitalWrite(BUILTIN_LED, HIGH);  // Turn the LED off by making the voltage HIGH
-  }
+  // печать - работает, убрал чтобы не мусорила
+  // MQTT_PRINT_INPUT_MESSANGE(topic, payload, length);
+  String s1, s2;
+  bool val;
+  s2 = String(topic);
+  for (byte i = 0; i < global_col_link_to_DI; i++){
+    s1 = global_link_to_settings->config.DIs.DI[global_link_to_DI[i]].MQTT_in.topic;
+    if (s1 == s2){
+      val = MQTT_GET_VAL_BOOL(payload, length);
+      if(global_MQTT_in_col < 10){ //проверка на переполнение очереди команд
+        global_MQTT_in_val[global_MQTT_in_col] = val;
+        global_MQTT_in_links[global_MQTT_in_col] = global_link_to_DI[i];
+        global_MQTT_in_col++;
+      }
+    }
+  }  
 }
 //-----------------(методы класса MyClass_MQTT)----------------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -76,6 +92,7 @@ void MyClass_MQTT::reconnect() {
       //client.publish("outTopic", "hello world");
       // ... and resubscribe
       //client.subscribe("inTopic");
+      // subscribe();
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
@@ -97,6 +114,8 @@ void MyClass_MQTT::setup(MyClass_Config *my_config) {
   settings = my_config;
   settings->data.MQTT = (int*)this;
 
+  // client.setClient(espClient);  // работало с WiFi
+  // espClient
   client.setClient(espClient);
   client.setServer(settings->config.MQTT.Server.c_str(), (uint16_t)settings->config.MQTT.port);
   client.setCallback(callback2);
@@ -105,6 +124,7 @@ void MyClass_MQTT::setup(MyClass_Config *my_config) {
   Serial.println("MyClass_MQTT setup done");
 
   setup_DI();
+  global_MQTT_in_col = 0;
 }
 //-----------------(методы класса MyClass_MQTT)----------------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -119,6 +139,19 @@ void MyClass_MQTT::setup_DI(){
   link_to_DI = new byte[col_input_messange];
   for (byte i = 0; i < col_input_messange; i++){
     link_to_DI[i] = mas[i];
-    client.subscribe(settings->config.DIs.DI[link_to_DI[i]].MQTT_in.topic.c_str());
   }
+  
+  global_col_link_to_DI = col_input_messange;
+  global_link_to_DI = new byte[global_col_link_to_DI];
+  for (byte i = 0; i < global_col_link_to_DI; i++){
+    global_link_to_DI[i] = link_to_DI[i];
+  }
+  global_link_to_settings = settings;
+}
+//-----------------(методы класса MyClass_MQTT)----------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+void MyClass_MQTT::subscribe(){
+  for (byte i = 0; i < col_input_messange; i++){
+    client.subscribe(settings->config.DIs.DI[link_to_DI[i]].MQTT_in.topic.c_str());
+  }  
 }
