@@ -1,4 +1,4 @@
-//version 0.17 date 11/10/2022
+//version 0.18 date 28/10/2022
 #include "lib_PCF8575_NEW.h"
 //-----------------(методы класса MyClass_PCF8575)---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -32,10 +32,9 @@ void MyClass_PCF8575::setup(MyClass_Config *my_config, byte num_board){
   }
 
   str_adr = settings->config.MQTT.Home_topic + "PCF8575/board " + String(num_board) + "/online"; 
-  // MQTT_link_adr[0] = my_Tags->CreateNewTag(&adr);      //error here
+  MQTT_link_adr[0] = my_Tags->CreateNewTag(&str_adr);      //error here
   str_adr = settings->config.MQTT.Home_topic + "PCF8575/board " + String(num_board) + "/I2C_addres"; 
-  // MQTT_link_adr[1] = my_Tags->CreateNewTag(&adr);      //error here
-
+  MQTT_link_adr[1] = my_Tags->CreateNewTag(&str_adr);      //error here
 
   All_DI_is_set = false;
 }
@@ -56,7 +55,7 @@ void MyClass_PCF8575::setup_DI_one(byte i, byte num_board){
     }
   }
   str_adr = settings->config.MQTT.Home_topic + "PCF8575/board " + String(num_board) + "/DI_" + String(i) + ".val";
-  // MQTT_link_val[i] = my_Tags->CreateNewTag(&adr, true);   //error here
+  MQTT_link_val[i] = my_Tags->CreateNewTag(&str_adr, true);   //error here
 }
 //-----------------(методы класса MyClass_PCF8575)---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -123,9 +122,7 @@ void MyClass_PCF8575::read_state_DI(){// 7390 mks
     byte read_value_2;
     if (Wire.requestFrom(I2C_adr, 2) == 2){
       read_value_1=(Wire.read());
-      // my_ethernet->DEBAG(" Byte 1:", read_value_1);
       read_value_2=(Wire.read());
-      // my_ethernet->DEBAG(" Byte 2:", read_value_2);
 
       bool bits[16];
       bits[0] = read_value_1 & 1; 
@@ -148,23 +145,28 @@ void MyClass_PCF8575::read_state_DI(){// 7390 mks
       All_DI_is_set = true;
       for (byte i = 0; i < 16; i++){ 
         bool b1;
-        if (bits[i] == 0){b1 = false;}
-        if (bits[i] == 1){b1 = true;}
+        if (bits[i] == 0){b1 = true;}
+        if (bits[i] == 1){b1 = false;}
         DI[i].debounce(b1);        
         
         if (DI[i].is_set_val_curr){
           settings->config.DIs.DI[link_to_DI_in_config[i]].Val = DI[i].val_curr;
+          if (DI[i].is_enable) my_Tags->SetTagVal(MQTT_link_val[i], DI[i].val_curr);
         }else{
           All_DI_is_set = false;
         }
       }
       if (All_DI_is_set){
-        my_ethernet->DEBAG(" Byte 1:", read_value_1);
-        my_ethernet->DEBAG(" Byte 2:", read_value_2);
+        my_ethernet->DEBUG(" Byte 1:", read_value_1);
+        my_ethernet->DEBUG(" Byte 2:", read_value_2);
       }
 
     }   
   }
+  // for (byte i = 0; i < 16; i++){ // 292 mks
+    // if (DI[i].is_enable) my_Tags->SetTagVal(MQTT_link_val[i], DI[i].val_curr);
+    // if (DO[i].is_enable) my_Tags->SetTagVal(MQTT_link_val[i], DO[i].val_curr);
+  // }           
 }
 //-----------------(методы класса MyClass_PCF8575)---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -172,11 +174,9 @@ void MyClass_PCF8575::write_state_one_DO(byte i, byte state){
   // board.digitalWrite(i, state);        
   // DO[i].debounce(state);
 }
-
 //-------------------------------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------
-
 //-----------------(методы класса MyClass_all_PCF8575)---------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 void MyClass_all_PCF8575::setup(MyClass_Config *my_config){
@@ -189,23 +189,28 @@ void MyClass_all_PCF8575::setup(MyClass_Config *my_config){
   for (byte i = 0; i < col_board; i++) {
     board[i].setup(settings, i);
   }
-  settings->status.lib_PCF8575.version_lib = "0.17";
-  settings->status.lib_PCF8575.date_lib    = "11.10.2022";    
+  settings->status.lib_PCF8575.version_lib = "0.18";
+  settings->status.lib_PCF8575.date_lib    = "28.10.2022";    
   Serial.println("MyClass_all_PCF8575 setup done");
 }
 //-----------------(методы класса MyClass_all_PCF8575)---------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 void MyClass_all_PCF8575::start(){
+  uint32_t t[2];
+  t[0] = micros();
   for (byte i = 0; i < col_board; i++) {
     board[i].start();
     is_online[i] = board[i].is_online;
   }
+  t[1] = micros();
+  settings->data.dt[5] = t[1] - t[0];
 }
 //-----------------(методы класса MyClass_all_PCF8575)---------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 void MyClass_all_PCF8575::interrupt(){
   for (byte i = 0; i < col_board; i++) {
     board[i].interrupt();
+    // my_ethernet->DEBUG("inner interrupt");
   }
 }
 //-------------------------------------------------------------------------------------------------------------------------------------

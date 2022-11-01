@@ -1,10 +1,10 @@
-//version 0.16 22/07/2022
+//version 0.17 01/11/2022
 #include "lib_Config.h"
 //-----------------(методы класса MyClass_WiFi)--------------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------
 void MyClass_Config::setup(){
-  status.lib_Config.version_lib = "0.16";
-  status.lib_Config.date_lib    = "22.07.2022";
+  status.lib_Config.version_lib = "0.17";
+  status.lib_Config.date_lib    = "01.11.2022";
 }
 //-----------------(методы класса MyClass_WiFi)--------------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------
@@ -22,6 +22,12 @@ String MyClass_Config::GetALLStatus(){
   rez += GetStatus(status.lib_Config, "lib_Config") + "\n";
   rez += GetStatus(status.lib_Mini, "lib_Mini") + "\n";
   rez += GetStatus(status.lib_PCF8575, "lib_PCF8575") + "\n";
+  rez += GetStatus(status.lib_MQTT, "lib_MQTT") + "\n";
+  rez += GetStatus(status.SysInfo, "lib_SysInfo") + "\n";
+  rez += GetStatus(status.DIs, "lib_DIs") + "\n";
+  rez += GetStatus(status.NTP, "lib_NTP") + "\n";
+  rez += GetStatus(status.MQTT_Tag, "lib_Tags") + "\n";
+  rez += GetStatus(status.WiFi, "lib_WiFi") + "\n";
   return rez;
 }
 //-----------------(методы класса MyClass_WiFi)--------------------------------------------------------------------------------------------------------------------

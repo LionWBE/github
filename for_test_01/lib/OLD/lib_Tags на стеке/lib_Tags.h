@@ -12,7 +12,7 @@
 #include <lib_MQTT.h>
 #include <lib_timer.h>
 #include <lib_Mini.h>
-// #include <StackArray.h>  
+#include <StackArray.h>  
 
 class MyClass_MQTT_Tag {
   public:
@@ -34,10 +34,9 @@ class MyClass_MQTT_Tag {
     uint16_t cur_tagLink;                      // номер для записи значения тега
     bool *TagUseTimeStamps;                    // параметр для определения использования метки времени
     char **TagNames;                           // имена тегов
-    String *TagValsOld;                        // значение тегов старое
-    String *TagVals;                           // значение тегов текущее
-    uint16_t *TagLinks;                        // ссылка на имя тега (номер в массиве TagNames и TagValsOld)
-
+    char **TagValsOld;                         // значение тегов старое
+    StackArray <char*> TagVals;                // значение тегов старое
+    StackArray <uint16_t> TagLinks;            // ссылка на имя тега (номер в массиве TagNames и TagValsOld)
     MyClass_timer timer_general_interogation;
     MyClass_Config *settings; 
     MyClass_MQTT *my_MQTT;

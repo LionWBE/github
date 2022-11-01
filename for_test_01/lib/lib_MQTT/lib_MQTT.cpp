@@ -1,15 +1,16 @@
-//version 0.15 date 05/07/2022
+//version 0.17 date 01/11/2022
 #include "lib_MQTT.h"
 MyClass_Config *volatile global_link_to_settings;
 volatile byte *global_link_to_DI;
 volatile byte global_col_link_to_DI;
-
 volatile byte global_MQTT_in_links[10];  // номера DI (для последующей обработке вне прерывания)
 volatile bool global_MQTT_in_val[10];    // значения DI (для последующей обработке вне прерывания)
 volatile byte global_MQTT_in_col;        // количество принятых сообщений (для последующей обработке вне прерывания)
 //-----------------(методы класса MyClass_MQTT)----------------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 void MyClass_MQTT::start() {
+  uint32_t t[2];
+  t[0] = micros();  
   if (!client.connected()) {
     reconnect();
     // client.subscribe("$SYS/broker/uptime"); // работает
@@ -22,6 +23,8 @@ void MyClass_MQTT::start() {
     settings->config.DIs.DI[global_MQTT_in_links[i]].Val = global_MQTT_in_val[i];
     global_MQTT_in_col--;
   }
+  t[1] = micros();
+  settings->data.dt[3] = t[1] - t[0];      
 }  
 //-----------------(методы класса MyClass_MQTT)----------------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -115,16 +118,21 @@ void MyClass_MQTT::setup(MyClass_Config *my_config) {
   settings->data.MQTT = (int*)this;
 
   // client.setClient(espClient);  // работало с WiFi
-  // espClient
-  client.setClient(espClient);
+  MyClass_Ethernet *clients;
+  clients = (MyClass_Ethernet*)settings->data.Ethernet;
+
+  client.setClient(clients->client);
   client.setServer(settings->config.MQTT.Server.c_str(), (uint16_t)settings->config.MQTT.port);
   client.setCallback(callback2);
   timer_reconect.time_delay_const = 500;
   timer_reconect.start();
-  Serial.println("MyClass_MQTT setup done");
 
   setup_DI();
   global_MQTT_in_col = 0;
+
+  settings->status.lib_MQTT.version_lib = "0.17";
+  settings->status.lib_MQTT.date_lib    = "01.11.2022";  
+  Serial.println("MyClass_MQTT setup done");
 }
 //-----------------(методы класса MyClass_MQTT)----------------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -13,6 +13,7 @@
 #include <lib_timer.h>
 #include <lib_Config.h>
 #include <lib_Mini.h>
+#include <lib_Ethernet.h>
 
 class MyClass_MQTT{
   public:
@@ -23,18 +24,19 @@ class MyClass_MQTT{
   private:
     void callback(char*, byte*, unsigned int);
     void reconnect();
+    void subscribe();         // подписаться на все входящие сообщения
     void setup_DI();          // для настройки входных сообщений и привязки их к DI
     byte col_input_messange;  // количество входных сообщений
     byte *link_to_DI;         // массив с номерами DI для входных сообщений
-
     unsigned long lastMsg = 0;
     #define MSG_BUFFER_SIZE	(50)
     char msg[MSG_BUFFER_SIZE];
     int value = 0;
     WiFiClient espClient;
     PubSubClient client;
-
+    // volatile MyClass_Config *settings;  
     MyClass_Config *settings;  
     MyClass_timer timer_reconect;
+    uint16_t *MQTT_link_val;               // ссылка на теги MQTT со значениями
 };
 #endif

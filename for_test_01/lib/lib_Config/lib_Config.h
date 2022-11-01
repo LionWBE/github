@@ -150,9 +150,10 @@ struct MyStruct_data{
   int *MQTT;
   int *Tags;
   int *Ethernet;
+  int *NTP;
   uint16_t Tags_queue_count; // количество значений в стеке для публикации
   uint16_t Tags_count;       // количество тегов в базе
-  uint32_t dt[10];
+  uint32_t dt[15];
 };
 //********************************
 struct MyStruct_Status{
@@ -167,6 +168,12 @@ struct MyStruct_ALLStatus{
   MyStruct_Status lib_Config;
   MyStruct_Status lib_Mini;
   MyStruct_Status lib_PCF8575;
+  MyStruct_Status lib_MQTT;
+  MyStruct_Status SysInfo;
+  MyStruct_Status DIs;
+  MyStruct_Status NTP;
+  MyStruct_Status MQTT_Tag;
+  MyStruct_Status WiFi;
 };
 //********************************
 class MyClass_Config {
