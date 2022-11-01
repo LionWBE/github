@@ -2,6 +2,7 @@
 #ifndef lib_Mini_h
 #define lib_Mini_h
 #include <lib_Config.h>
+#include <lib_Ethernet.h>
 
 #if defined(ARDUINO) && ARDUINO >= 100
 #include "Arduino.h"
@@ -73,6 +74,14 @@
     String StrWithSeparator_GetNStr(String str_in, char separator, byte num);
     // *********************************************************************************************
     String byte_mas_to_str(byte *, uint16_t);
+    // *********************************************************************************************
+    MyClass_Ethernet *ethernet_for_debug;
+    void EDEBUG(String packet);
+    void EDEBUG(byte packet);
+    void EDEBUG(String packet1, byte packet2);
+    void EDEBUG(String packet1, unsigned long packet2);
+    void EDEBUG(String packet1, String packet2);
+    void EDEBUG(String packet1, IPAddress packet2);    
     // *********************************************************************************************
     size_t GetFileSize(String file_name);
     String GetFileList();

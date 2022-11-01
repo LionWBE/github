@@ -52,6 +52,7 @@ void MyClass_NTP::SetLocalTime(String remote_date_time){
   dif = loc_dt - rem_dt;
   timeClient.setTimeOffset(dif);
   
+  EDEBUG(rem_dt);
   Serial.println(rem_dt);
   Serial.println(loc_dt);
   Serial.println(dif);

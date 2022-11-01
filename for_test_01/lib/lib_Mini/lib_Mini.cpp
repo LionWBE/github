@@ -4,6 +4,7 @@
 void lib_Mini_setup(MyClass_Config* settings){{
   settings->status.lib_Mini.version_lib = "0.17";
   settings->status.lib_Mini.date_lib = "22.07.2022";
+  ethernet_for_debug = (MyClass_Ethernet*)settings->data.Ethernet;
 }}
 //-------------------------------------------------------------------------------------------------------------------------------------
 char* create_char_array_from_string(String str){
@@ -314,4 +315,28 @@ void file_rename(String full_file_name_old, String full_file_name_new){
   SPIFFS.begin();
   SPIFFS.rename(full_file_name_old, full_file_name_new);
   SPIFFS.end();
+}
+//***************************************************************************************************
+void EDEBUG(String packet){
+  ethernet_for_debug->DEBUG(packet);
+}
+//***************************************************************************************************
+void EDEBUG(byte packet){
+  ethernet_for_debug->DEBUG(packet);
+}
+//***************************************************************************************************
+void EDEBUG(String packet1, byte packet2){
+  ethernet_for_debug->DEBUG(packet1, packet2);
+}
+//***************************************************************************************************
+void EDEBUG(String packet1, unsigned long packet2){
+  ethernet_for_debug->DEBUG(packet1, packet2);
+}
+//***************************************************************************************************
+void EDEBUG(String packet1, String packet2){
+  ethernet_for_debug->DEBUG(packet1, packet2);
+}
+//***************************************************************************************************
+void EDEBUG(String packet1, IPAddress packet2){
+  ethernet_for_debug->DEBUG(packet1, packet2);
 }

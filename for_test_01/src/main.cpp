@@ -32,7 +32,6 @@ void setup() {
   Serial.println();
   my_MyClass_JSON.loadConfiguration("/settings.json", &my_config); //загрузка конфигурации  
   my_config.setup();
-  lib_Mini_setup(&my_config);
   my_WiFi.setup(&my_config);
   my_ethernet.setup(&my_config);
   my_MQTT.setup(&my_config);
@@ -41,6 +40,7 @@ void setup() {
   my_PCF8575.setup(&my_config);
   my_DIs.setup(&my_config);
   my_NTP.setup(&my_config);
+  lib_Mini_setup(&my_config);
   // my_config.print();
   // delay(10000);  
 
