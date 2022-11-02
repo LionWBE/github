@@ -16,7 +16,7 @@
 #include "lib_timer.h"
 #include "lib_Config.h"
 #include "lib_Mini.h"
-#include "lib_NTP.h"
+// #include "lib_NTP.h"
 
 class MyClass_Ethernet{
   public:

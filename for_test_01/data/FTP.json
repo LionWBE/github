@@ -1,1 +1,1 @@
-{"FTP": {"Enable": true, "Login": "admin", "Password": "admin123"}}
+{"FTP": {"Enable": "true", "Login": "admin", "Password": "admin123"}}

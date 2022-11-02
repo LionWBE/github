@@ -8,7 +8,7 @@ void MyClass_NTP::setup(MyClass_Config *my_config){
   timeClient.Set_UDP(ntpUDP);
   timeClient.setTimeOffset(settings->config.NTP.offset*3600);
   timeClient.setUpdateInterval(60*1000);
-
+  my_ethernet = (MyClass_Ethernet*)settings->data.Ethernet;
   settings->status.NTP.version_lib = "0.11";
   settings->status.NTP.date_lib    = "01.11.2022"; 
   Serial.println("MyClass_NTP setup done");
@@ -21,7 +21,6 @@ void MyClass_NTP::start(){
   settings->data.time = timeClient.getFormattedTime();
   settings->data.date = timeClient.getDate();
   settings->data.time_stamp = settings->data.date + " " + settings->data.time + ":" + timeClient.getMillisec();
-  // timeClient.
   t[1] = micros();
   settings->data.dt[4] = t[1] - t[0];     
 }
@@ -52,22 +51,21 @@ void MyClass_NTP::SetLocalTime(String remote_date_time){
   dif = loc_dt - rem_dt;
   timeClient.setTimeOffset(dif);
   
-  EDEBUG(rem_dt);
-  Serial.println(rem_dt);
-  Serial.println(loc_dt);
-  Serial.println(dif);
+  my_ethernet->DEBUG(rem_dt);
+  my_ethernet->DEBUG(loc_dt);
+  my_ethernet->DEBUG(dif);
 
-  Serial.println(ptm.tm_year);
-  Serial.println(ptm.tm_mon);
-  Serial.println(ptm.tm_mday);
-  Serial.println(ptm.tm_hour);
-  Serial.println(ptm.tm_min);
-  Serial.println(ptm.tm_sec);
-  Serial.println(ptm.tm_wday);
-  Serial.println(ptm.tm_yday);
-  Serial.println(ptm.tm_isdst);
-
-  Serial.println(remote_date_time);
+  my_ethernet->DEBUG(ptm.tm_year);
+  my_ethernet->DEBUG(ptm.tm_mon);
+  my_ethernet->DEBUG(ptm.tm_mday);
+  my_ethernet->DEBUG(ptm.tm_hour);
+  my_ethernet->DEBUG(ptm.tm_min);
+  my_ethernet->DEBUG(ptm.tm_sec);
+  my_ethernet->DEBUG(ptm.tm_wday);
+  my_ethernet->DEBUG(ptm.tm_yday);
+  my_ethernet->DEBUG(ptm.tm_isdst);
+  
+  my_ethernet->DEBUG(remote_date_time);
 
   // ptm.tm_year = StrWithSeparator_GetNStr(local_date_and_time, '_', 0).toInt();
   // ptm.tm_mon = StrWithSeparator_GetNStr(local_date_and_time, '_', 1).toInt();  

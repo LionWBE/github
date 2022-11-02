@@ -12,6 +12,7 @@
 #include <WiFiUdp.h>
 #include <lib_Config.h>
 #include <lib_Mini.h>
+#include <lib_Ethernet.h>
 
 class MyClass_NTP {
   public:
@@ -22,5 +23,6 @@ class MyClass_NTP {
 	  WiFiUDP ntpUDP;
 	  NTPClient timeClient;
     MyClass_Config *settings;
+    MyClass_Ethernet *my_ethernet;         // указатель на Ethernet
 };
 #endif

@@ -142,8 +142,9 @@ void MyClass_Ethernet::receivePacket() {
         }else if(msg.startsWith(MSG_LIST[15])){ 
           DEBUG("команда синхронизировать часы с компьютером");
           msg.replace(MSG_LIST[15], "");
-          MyClass_NTP *my_NTP = (MyClass_NTP*)settings->data.NTP;
-          my_NTP->SetLocalTime(msg);
+          settings.
+          // MyClass_NTP *my_NTP = (MyClass_NTP*)settings->data.NTP;
+          // my_NTP->SetLocalTime(msg);
         }
       }
     }

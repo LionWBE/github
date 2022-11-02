@@ -70,7 +70,7 @@ class MyClass_PCF8575 {
     void setup_DO_one(byte i, byte num_board);
     MyClass_Config *settings;              // указатель на глобальные настройки
     MyClass_MQTT_Tag *my_Tags;             // указатель на теги для MQTT
-    MyClass_Ethernet *my_ethernet;          // указатель на Ethernet
+    MyClass_Ethernet *my_ethernet;         // указатель на Ethernet
     uint16_t *MQTT_link_val;               // ссылка на теги MQTT со значениями
     uint16_t MQTT_link_adr[3];             // ссылки на общие параметры (адрес I2C, наличие связи)
 };
