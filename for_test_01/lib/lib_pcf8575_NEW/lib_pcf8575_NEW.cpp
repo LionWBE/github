@@ -107,14 +107,17 @@ void MyClass_PCF8575::start(){
     if (DO[i].is_enable){
       byte link = link_to_DO_in_config[i];
       bool state = settings->config.DOs.DO[link].Cmd;
-      
-      byte cur_state = all_state_do & mask_bit[i];
-      
+      byte cur_state = all_state_do & mask_bit[i]; // текущее состояние i выхода
+      if(cur_state != state){
+        // if(state == 0)all_state_do &= ~(1 << i);
+        // if(state == 1)all_state_do &= ~(1 << i);
+        all_state_do ^= (1 << i);
+      }
       // mask_bit[i]
       // all_state_do
     }
   }
-  write_state_one_DO(i, state); // переименовать, т.к. установка идет сразу на все выхода
+  // write_state_one_DO(i, state); // переименовать, т.к. установка идет сразу на все выхода
 
   //     bool enable = settings->config.DOs.DO[link_to_DO_in_config[i]].LinkTo.Enable;
   //     if (enable){
