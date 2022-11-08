@@ -22,5 +22,6 @@ class MyClass_DIs {
     MyClass_Config *settings;              // указатель на настройки
     MyClass_MQTT_Tag *my_Tags;             // указатель на теги для MQTT
     uint16_t *MQTT_link_val;               // ссылка на теги MQTT со значениями
+    byte *Link_to_DO;                      // ссылка на DO который управляется по конфигурации указанным DI (для записи в него значения)     
 };
 #endif

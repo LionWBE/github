@@ -1,4 +1,4 @@
-//version 0.18 date 28/10/2022
+//version 0.19 date 08/11/2022
 #include "lib_PCF8575_NEW.h"
 //-----------------(методы класса MyClass_PCF8575)---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -36,7 +36,14 @@ void MyClass_PCF8575::setup(MyClass_Config *my_config, byte num_board){
   str_adr = settings->config.MQTT.Home_topic + "PCF8575/board " + String(num_board) + "/I2C_addres"; 
   MQTT_link_adr[1] = my_Tags->CreateNewTag(&str_adr);      //error here
 
+  mask_bit[0] = 1;
+  for(byte i = 1; i < 16; i++) {
+    mask_bit[i] = mask_bit[i-1]*2; 
+  }
+  
   All_DI_is_set = false;
+  timer_link.time_delay_const = 1000;
+  timer_link.start();  
 }
 //-----------------(методы класса MyClass_PCF8575)---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -46,6 +53,7 @@ void MyClass_PCF8575::setup_DI_one(byte i, byte num_board){
   DO[i].is_enable = false;
   DI[i].setup(settings);
   link_to_DI_in_config[i] = -1; 
+  // поиск ссылок на DI и их запоминание
   for (byte j = 0; j < settings->config.DIs.col; j++) {
     if (num_board == settings->config.DIs.DI[j].PCF8575_adr.board_num){
       if (i == settings->config.DIs.DI[j].PCF8575_adr.input_num){
@@ -54,6 +62,7 @@ void MyClass_PCF8575::setup_DI_one(byte i, byte num_board){
       }
     }
   }
+  //
   str_adr = settings->config.MQTT.Home_topic + "PCF8575/board " + String(num_board) + "/DI_" + String(i) + ".val";
   MQTT_link_val[i] = my_Tags->CreateNewTag(&str_adr, true);   //error here
 }
@@ -74,7 +83,7 @@ void MyClass_PCF8575::setup_DO_one(byte i, byte num_board){
     }
   }  
   str_adr = settings->config.MQTT.Home_topic + "PCF8575/board " + String(num_board) + "/DO_" + String(i) + ".val";
-  // MQTT_link_val[i] = my_Tags->CreateNewTag(&adr, true);     //error here
+  MQTT_link_val[i] = my_Tags->CreateNewTag(&str_adr, true);     //error here
 }
 //-----------------(методы класса MyClass_PCF8575)---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -82,12 +91,31 @@ void MyClass_PCF8575::start(){
   if(All_DI_is_set == false){   //  если есть неустановившийся режим для DI
     read_state_DI();
   }
-  // for (byte i = 0; i < 16; i++){ // 292 mks
-  //   if (DI[i].is_enable){
-  //     read_state_one_DI(i);
-  //   } 
-  //   if (DO[i].is_enable){
-  //     // state = settings->config.DOs.DO[link_to_DO_in_config[i]].Cmd;
+  if(timer_link.is_done()){
+    Wire.beginTransmission(I2C_adr);
+    byte error = Wire.endTransmission();
+    if (error == 0){    // online
+      is_online = true;
+    }else{              // offline
+      is_online = false;
+    }
+    my_Tags->SetTagVal(MQTT_link_adr[0], is_online); // 192 mks  //error here
+    my_Tags->SetTagVal(MQTT_link_adr[1], I2C_adr);   // 19 mks   //error here    
+  }
+
+  for (byte i = 0; i < 16; i++){ // 292 mks
+    if (DO[i].is_enable){
+      byte link = link_to_DO_in_config[i];
+      bool state = settings->config.DOs.DO[link].Cmd;
+      
+      byte cur_state = all_state_do & mask_bit[i];
+      
+      // mask_bit[i]
+      // all_state_do
+    }
+  }
+  write_state_one_DO(i, state); // переименовать, т.к. установка идет сразу на все выхода
+
   //     bool enable = settings->config.DOs.DO[link_to_DO_in_config[i]].LinkTo.Enable;
   //     if (enable){
   //       byte type = settings->config.DOs.DO[link_to_DO_in_config[i]].LinkTo.type;
@@ -104,10 +132,6 @@ void MyClass_PCF8575::start(){
     // if (DI[i].is_enable) my_Tags->SetTagVal(MQTT_link_val[i], DI[i].val_curr);
     // if (DO[i].is_enable) my_Tags->SetTagVal(MQTT_link_val[i], DO[i].val_curr);
   // } 
-  // uint8_t adr = board.Get_I2C_Addres(); // 8 mks
-  // is_online = board.IsStatusTwoWireOnline(adr);
-  // my_Tags->SetTagVal(MQTT_link_adr[0], is_online); // 192 mks  //error here
-  // my_Tags->SetTagVal(MQTT_link_adr[1], adr); // 19 mks   //error here
 }
 //-----------------(методы класса MyClass_PCF8575)---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -171,6 +195,13 @@ void MyClass_PCF8575::read_state_DI(){// 7390 mks
 //-----------------(методы класса MyClass_PCF8575)---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
 void MyClass_PCF8575::write_state_one_DO(byte i, byte state){
+  // Wire.beginTransmission(Address);
+  // Wire.write(0x00);
+  // Wire.write(0x00);
+  // Wire.endTransmission(); 
+
+
+
   // board.digitalWrite(i, state);        
   // DO[i].debounce(state);
 }
@@ -189,8 +220,8 @@ void MyClass_all_PCF8575::setup(MyClass_Config *my_config){
   for (byte i = 0; i < col_board; i++) {
     board[i].setup(settings, i);
   }
-  settings->status.lib_PCF8575.version_lib = "0.18";
-  settings->status.lib_PCF8575.date_lib    = "28.10.2022";    
+  settings->status.lib_PCF8575.version_lib = "0.19";
+  settings->status.lib_PCF8575.date_lib    = "08.11.2022";    
   Serial.println("MyClass_all_PCF8575 setup done");
 }
 //-----------------(методы класса MyClass_all_PCF8575)---------------------------------------------------------------------------------------------------------------

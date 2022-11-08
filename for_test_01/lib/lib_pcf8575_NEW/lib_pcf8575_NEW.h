@@ -73,6 +73,9 @@ class MyClass_PCF8575 {
     MyClass_Ethernet *my_ethernet;         // указатель на Ethernet
     uint16_t *MQTT_link_val;               // ссылка на теги MQTT со значениями
     uint16_t MQTT_link_adr[3];             // ссылки на общие параметры (адрес I2C, наличие связи)
+    MyClass_timer timer_link;              // таймер для определения наличия связи
+    uint16_t all_state_do;                 // обощенное состояние выодов для записи
+    uint16_t mask_bit[16];                 // битовая маска
 };
 
 class MyClass_all_PCF8575 {

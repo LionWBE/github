@@ -73,13 +73,13 @@ struct MyStruct_DIs {
 //********************************
 struct MyStruct_LinkTo {
   bool Enable;
-  byte type; // 1 - RS_Triger
+  byte type; // 1 - RS_Triger, 2 - to DI
   byte link;
 };
 //********************************
 struct MyStruct_DO {
   byte Type; // 1 - inner_SPI, 2 - 
-  byte Cmd; 
+  byte Cmd;  // значение выхода true/false
   String Description;
   MyStruct_PCF8575_adr PCF8575_adr;
   MyStruct_MQTT_out MQTT_out;
