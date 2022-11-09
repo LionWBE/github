@@ -1,10 +1,16 @@
-//version 0.18 date 22/07/2022
+//version 0.19 date 09/11/2022
 #include "lib_Mini.h"
 //-------------------------------------------------------------------------------------------------------------------------------------
 void lib_Mini_setup(MyClass_Config* settings){{
-  settings->status.lib_Mini.version_lib = "0.17";
-  settings->status.lib_Mini.date_lib = "22.07.2022";
+  settings->status.lib_Mini.version_lib = "0.19";
+  settings->status.lib_Mini.date_lib = "09.11.2022";
 }}
+//-------------------------------------------------------------------------------------------------------------------------------------
+byte bool_to_byte(bool val){
+    byte s = 0;
+    if (val) s = 1;
+    return s;
+}
 //-------------------------------------------------------------------------------------------------------------------------------------
 char* create_char_array_from_string(String str){
     int n = str.length()+1;
@@ -316,3 +322,12 @@ void file_rename(String full_file_name_old, String full_file_name_new){
   SPIFFS.end();
 }
 //***************************************************************************************************
+byte get_val_bit_by_number(byte num_bit, byte value){
+  byte bit = (value >> num_bit) & 1;
+  return bit;      
+}        
+//***************************************************************************************************
+byte get_val_bit_by_number(byte num_bit, uint16_t value){
+  byte bit = (value >> num_bit) & 1;
+  return bit;      
+}        

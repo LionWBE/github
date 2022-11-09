@@ -1,4 +1,4 @@
-//version 0.18 date 22/07/2022
+//version 0.19 date 09/11/2022
 #ifndef lib_Mini_h
 #define lib_Mini_h
 #include <lib_Config.h>
@@ -19,6 +19,9 @@
     String addr_char_to_string(byte *addr);
     void float_to_2byte(float fval, byte *bval);
     float four_byte_to_float(byte *bval);
+    byte bool_to_byte(bool val);
+    byte get_val_bit_by_number(byte num_bit, byte value);
+    byte get_val_bit_by_number(byte num_bit, uint16_t value);
     // *********************************************************************************************
     const unsigned char crc8Table[256] = {
         0x00, 0x07, 0x0E, 0x09, 0x1C, 0x1B, 0x12, 0x15,
@@ -54,6 +57,7 @@
         0xDE, 0xD9, 0xD0, 0xD7, 0xC2, 0xC5, 0xCC, 0xCB,
         0xE6, 0xE1, 0xE8, 0xEF, 0xFA, 0xFD, 0xF4, 0xF3
     };
+
     byte Compute_CRC8(byte *bytes, int len);
     byte Compute_CRC8_for_file(byte *bytes, int len, byte crc);
     byte Compute_CRC8_for_full_file(String file);

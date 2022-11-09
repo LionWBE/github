@@ -79,7 +79,7 @@ struct MyStruct_LinkTo {
 //********************************
 struct MyStruct_DO {
   byte Type; // 1 - inner_SPI, 2 - 
-  byte Cmd;  // значение выхода true/false
+  byte Cmd;  // значение выхода 0/1
   String Description;
   MyStruct_PCF8575_adr PCF8575_adr;
   MyStruct_MQTT_out MQTT_out;

@@ -65,7 +65,7 @@ class MyClass_PCF8575 {
     byte link_to_DI_in_config[16];
     byte link_to_DO_in_config[16];
     void read_state_DI();  
-    void write_state_one_DO(byte i, byte state);
+    void write_state_DO();
     void setup_DI_one(byte i, byte num_board);
     void setup_DO_one(byte i, byte num_board);
     MyClass_Config *settings;              // указатель на глобальные настройки
@@ -75,7 +75,6 @@ class MyClass_PCF8575 {
     uint16_t MQTT_link_adr[3];             // ссылки на общие параметры (адрес I2C, наличие связи)
     MyClass_timer timer_link;              // таймер для определения наличия связи
     uint16_t all_state_do;                 // обощенное состояние выодов для записи
-    uint16_t mask_bit[16];                 // битовая маска
 };
 
 class MyClass_all_PCF8575 {
