@@ -36,11 +36,6 @@ void MyClass_PCF8575::setup(MyClass_Config *my_config, byte num_board){
   str_adr = settings->config.MQTT.Home_topic + "PCF8575/board " + String(num_board) + "/I2C_addres"; 
   MQTT_link_adr[1] = my_Tags->CreateNewTag(&str_adr);      //error here
 
-  mask_bit[0] = 1;
-  for(byte i = 1; i < 16; i++) {
-    mask_bit[i] = mask_bit[i-1]*2; 
-  }
-  
   All_DI_is_set = false;
   timer_link.time_delay_const = 1000;
   timer_link.start();  
@@ -73,7 +68,8 @@ void MyClass_PCF8575::setup_DO_one(byte i, byte num_board){
   DI[i].is_enable = false;
   DO[i].is_enable = true;
   DO[i].setup(settings);
-  link_to_DO_in_config[i] = -1; 
+  // DO[i].
+  link_to_DO_in_config[i] = 255; 
   for (byte j = 0; j < settings->config.DOs.col; j++) {
     if (num_board == settings->config.DOs.DO[j].PCF8575_adr.board_num){
       if (i == settings->config.DOs.DO[j].PCF8575_adr.input_num){
@@ -106,19 +102,18 @@ void MyClass_PCF8575::start(){
   for (byte i = 0; i < 16; i++){ // 292 mks
     if (DO[i].is_enable){
       byte link = link_to_DO_in_config[i];
-      bool state = settings->config.DOs.DO[link].Cmd;
-      byte cur_state = all_state_do & mask_bit[i]; // текущее состояние i выхода
-      if(cur_state != state){
-        // if(state == 0)all_state_do &= ~(1 << i);
-        // if(state == 1)all_state_do &= ~(1 << i);
-        all_state_do ^= (1 << i);
+      if(link != 255){                                    // поидее условие никогда не должно выполняться, т.к. все должно быть привязвано
+        byte state = settings->config.DOs.DO[link].Cmd;   // требуемое для выставления состояние
+        byte cur_state = get_val_bit_by_number(i, all_state_do); // текущее состояние выхода
+        if(cur_state != state){
+          all_state_do ^= (1 << i);
+        }
       }
-      // mask_bit[i]
-      // all_state_do
     }
   }
-  // write_state_one_DO(i, state); // переименовать, т.к. установка идет сразу на все выхода
-
+  if (DO[0].is_enable){
+    write_state_DO();
+  }
   //     bool enable = settings->config.DOs.DO[link_to_DO_in_config[i]].LinkTo.Enable;
   //     if (enable){
   //       byte type = settings->config.DOs.DO[link_to_DO_in_config[i]].LinkTo.type;
@@ -190,23 +185,18 @@ void MyClass_PCF8575::read_state_DI(){// 7390 mks
 
     }   
   }
-  // for (byte i = 0; i < 16; i++){ // 292 mks
-    // if (DI[i].is_enable) my_Tags->SetTagVal(MQTT_link_val[i], DI[i].val_curr);
-    // if (DO[i].is_enable) my_Tags->SetTagVal(MQTT_link_val[i], DO[i].val_curr);
-  // }           
 }
 //-----------------(методы класса MyClass_PCF8575)---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
-void MyClass_PCF8575::write_state_one_DO(byte i, byte state){
-  // Wire.beginTransmission(Address);
-  // Wire.write(0x00);
-  // Wire.write(0x00);
-  // Wire.endTransmission(); 
-
-
-
-  // board.digitalWrite(i, state);        
-  // DO[i].debounce(state);
+void MyClass_PCF8575::write_state_DO(){
+  byte cur_state_1 = all_state_do & 255;
+  byte cur_state_2 = all_state_do >> 8;
+  cur_state_1 = ~cur_state_1; // инвертируем
+  cur_state_2 = ~cur_state_2; // инвертируем
+  Wire.beginTransmission(I2C_adr);
+  Wire.write(cur_state_1);
+  Wire.write(cur_state_2);
+  Wire.endTransmission(); 
 }
 //-------------------------------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------

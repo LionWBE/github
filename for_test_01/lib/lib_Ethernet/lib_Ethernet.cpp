@@ -501,3 +501,9 @@ void MyClass_Ethernet::DEBUG(String packet1, IPAddress packet2){
   String str = packet1 + packet2.toString();
   DEBUG(str);
 }
+//-----------------(методы класса MyClass_Ethernet)------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------
+void MyClass_Ethernet::DEBUG(String packet1, uint16_t packet2){
+  String str = packet1 + String(packet2);
+  DEBUG(str);
+}

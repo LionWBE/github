@@ -1,4 +1,4 @@
-//version 0.15 date 12/07/2022
+//version 0.16 date 09/11/2022
 #include "lib_JSON.h"
 // есть проблема с большими файлами (более 2048 байт) - не хватает буфера для чтения, при увеличении буфера появляется ошибка загрузки
 // поэтому было решено разделить файлы JSON на мелкие до 2048 байт
@@ -6,8 +6,8 @@
 //-----------------(методы класса MyClass_JSON)----------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------
 void MyClass_JSON::loadConfiguration(const char *filename, MyClass_Config *my_config) {
-  my_config->status.lib_JSON.version_lib = "0.15";
-  my_config->status.lib_JSON.date_lib    = "12.07.2022";
+  my_config->status.lib_JSON.version_lib = "0.16";
+  my_config->status.lib_JSON.date_lib    = "09.11.2022";
   
   SPIFFS.begin();
   Serial.println(F("Loading configuration..."));
@@ -424,6 +424,8 @@ byte MyClass_JSON::Config_DOs(const char *filename, MyClass_Config *my_config, b
       my_config->config.DOs.DO[i3].LinkTo.link = doc["DOs"]["DO"][i1]["LinkTo"]["link"].as<byte>();
       s = doc["DOs"]["DO"][i1]["LinkTo"]["type"].as<String>();
       if (s == "RS_Triger") my_config->config.DOs.DO[i3].LinkTo.type = 1;
+      if (s == "DI") my_config->config.DOs.DO[i3].LinkTo.type = 2;
+      my_config->config.DOs.DO[i3].Cmd = 0;      // зануляем выхода
     }
   }
   doc.clear();

@@ -29,6 +29,7 @@ class MyClass_Ethernet{
     void DEBUG(String packet1, unsigned long packet2);
     void DEBUG(String packet1, String packet2);
     void DEBUG(String packet1, IPAddress packet2);
+    void DEBUG(String packet1, uint16_t packet2);
     EthernetClient client;
   private:
     MyClass_Config *settings;
