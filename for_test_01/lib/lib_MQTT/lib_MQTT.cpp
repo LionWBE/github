@@ -1,4 +1,4 @@
-//version 0.17 date 01/11/2022
+//version 0.18 date 11/12/2022
 #include "lib_MQTT.h"
 MyClass_Config *volatile global_link_to_settings;
 volatile byte *global_link_to_DI;
@@ -73,36 +73,42 @@ void callback2(char* topic, byte* payload, unsigned int length) {
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 void MyClass_MQTT::reconnect() {
   // Loop until we're reconnected
-  if(timer_reconect.is_done() and !client.connected()){
+  if(!client.connected()){
+  // if(timer_reconect.is_done() and !client.connected()){
   //while (!client.connected()) {
-    Serial.print("Attempting MQTT connection...");
-    // Create a random client ID
-    String clientId = "ESP8266Client-";
-    clientId += String(random(0xffff), HEX);
+    if (timer_reconect.is_done()){
+      Serial.print("Attempting MQTT connection...");
+      // Create a random client ID
+      String clientId = "ESP8266Client-";
+      clientId += String(random(0xffff), HEX);
 
-    Serial.print(" client = ");
-    Serial.print(clientId);
-    Serial.print(" login = ");
-    Serial.print(settings->config.MQTT.Login);
-    Serial.print(" passwrd = ");
-    Serial.print(settings->config.MQTT.Password);    
+      Serial.print(" MQTT Server = ");
+      Serial.print(settings->config.MQTT.Server.c_str());
+      Serial.print(" client = ");
+      Serial.print(clientId);
+      Serial.print(" login = ");
+      Serial.print(settings->config.MQTT.Login);
+      Serial.print(" passwrd = ");
+      Serial.print(settings->config.MQTT.Password);    
 
-    // Attempt to connect
-    if (client.connect(clientId.c_str(), settings->config.MQTT.Login.c_str(), settings->config.MQTT.Password.c_str())) {
-      Serial.println(" connected");
-      is_connect = true;
-      // Once connected, publish an announcement...
-      //client.publish("outTopic", "hello world");
-      // ... and resubscribe
-      //client.subscribe("inTopic");
-      // subscribe();
-    } else {
-      Serial.print("failed, rc=");
-      Serial.print(client.state());
-      Serial.println(" try again in 5 seconds");
-      // Wait 5 seconds before retrying
-      is_connect = false;
-      delay(5000);
+      // Attempt to connect
+      if (client.connect(clientId.c_str(), settings->config.MQTT.Login.c_str(), settings->config.MQTT.Password.c_str())) {
+        Serial.println(" connected");
+        is_connect = true;
+        // Once connected, publish an announcement...
+        //client.publish("outTopic", "hello world");
+        // ... and resubscribe
+        //client.subscribe("inTopic");
+        // subscribe();
+      } else {
+        Serial.print("failed, rc=");
+        Serial.print(client.state());
+        Serial.println(" try again in 5 seconds");
+        // Wait 5 seconds before retrying
+        is_connect = false;
+        timer_reconect.start();
+        // delay(5000);
+      }
     }
   }
 }
@@ -124,14 +130,14 @@ void MyClass_MQTT::setup(MyClass_Config *my_config) {
   client.setClient(clients->client);
   client.setServer(settings->config.MQTT.Server.c_str(), (uint16_t)settings->config.MQTT.port);
   client.setCallback(callback2);
-  timer_reconect.time_delay_const = 500;
+  timer_reconect.time_delay_const = 5000;
   timer_reconect.start();
 
   setup_DI();
   global_MQTT_in_col = 0;
 
-  settings->status.lib_MQTT.version_lib = "0.17";
-  settings->status.lib_MQTT.date_lib    = "01.11.2022";  
+  settings->status.lib_MQTT.version_lib = "0.18";
+  settings->status.lib_MQTT.date_lib    = "11.12.2022";  
   Serial.println("MyClass_MQTT setup done");
 }
 //-----------------(методы класса MyClass_MQTT)----------------------------------------------------------------------------------------------------------------------
