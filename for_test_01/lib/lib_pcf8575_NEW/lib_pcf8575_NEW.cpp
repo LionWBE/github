@@ -105,12 +105,23 @@ void MyClass_PCF8575::start(){
       if(link != 255){                                    // поидее условие никогда не должно выполняться, т.к. все должно быть привязвано
         byte state = settings->config.DOs.DO[link].Cmd;   // требуемое для выставления состояние
         byte cur_state = get_val_bit_by_number(i, all_state_do); // текущее состояние выхода
+        
+        // Serial.print("i = ");
+        // Serial.println(i);
+        // Serial.print("state = ");
+        // Serial.println(state);
+        // Serial.print("cur_state = ");
+        // Serial.println(cur_state);
         if(cur_state != state){
           all_state_do ^= (1 << i);
         }
       }
     }
   }
+  // Serial.print("all_state_do = ");
+  // Serial.println(all_state_do);
+  // delay(100);
+  
   if (DO[0].is_enable){
     write_state_DO();
   }
@@ -197,6 +208,15 @@ void MyClass_PCF8575::write_state_DO(){
   Wire.write(cur_state_1);
   Wire.write(cur_state_2);
   Wire.endTransmission(); 
+
+
+  // Serial.print("I2C_adr = ");
+  // Serial.println(I2C_adr); 
+  // Serial.print("cur_state_1 = ");
+  // Serial.println(cur_state_1);  
+  // Serial.print("cur_state_2 = ");
+  // Serial.println(cur_state_2);    
+  // delay(1000);
 }
 //-------------------------------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------

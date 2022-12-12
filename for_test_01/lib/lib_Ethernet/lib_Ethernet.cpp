@@ -35,8 +35,8 @@ void MyClass_Ethernet::setup(MyClass_Config *my_config){
     timeout_recieve_file.time_delay_const = 2000;
   }
 
-  settings->status.lib_Ethernet.version_lib = "0.23";
-  settings->status.lib_Ethernet.date_lib    = "01.11.2022";
+  settings->status.lib_Ethernet.version_lib = "0.24";
+  settings->status.lib_Ethernet.date_lib    = "12.12.2022";
   DEBUG("MyClass_Ethernet setup done");
 }
 //-----------------(методы класса MyClass_Ethernet)------------------------------------------------------------------------------------
@@ -145,6 +145,13 @@ void MyClass_Ethernet::receivePacket() {
           // settings.
           // MyClass_NTP *my_NTP = (MyClass_NTP*)settings->data.NTP;
           // my_NTP->SetLocalTime(msg);
+        }else if(msg.startsWith(MSG_LIST[16])){ 
+          DEBUG("команда тестирования выхода DO");
+          msg.replace(MSG_LIST[16] + "_", "");
+          DEBUG(msg);
+          // settings.
+          // MyClass_NTP *my_NTP = (MyClass_NTP*)settings->data.NTP;
+          // my_NTP->SetLocalTime(msg);
         }
       }
     }
@@ -249,6 +256,7 @@ void MyClass_Ethernet::get_MSG_LIST(String *MSG_LIST){
   MSG_LIST[13] = "ESP_" + WiFiMAC + "_CMD_DEBUG_OFF";
   MSG_LIST[14] = "ESP_" + WiFiMAC + "_CMD_GET_INFO";
   MSG_LIST[15] = "ESP_" + WiFiMAC + "_CMD_SET_CLOCK";
+  MSG_LIST[16] = "ESP_" + WiFiMAC + "_CMD_SET_DO";
 }
 //-----------------(методы класса MyClass_Ethernet)------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------

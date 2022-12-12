@@ -1,4 +1,4 @@
-//version 0.16 date 09/11/2022
+//version 0.17 date 12/12/2022
 #include "lib_JSON.h"
 // есть проблема с большими файлами (более 2048 байт) - не хватает буфера для чтения, при увеличении буфера появляется ошибка загрузки
 // поэтому было решено разделить файлы JSON на мелкие до 2048 байт
@@ -6,8 +6,8 @@
 //-----------------(методы класса MyClass_JSON)----------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------
 void MyClass_JSON::loadConfiguration(const char *filename, MyClass_Config *my_config) {
-  my_config->status.lib_JSON.version_lib = "0.16";
-  my_config->status.lib_JSON.date_lib    = "09.11.2022";
+  my_config->status.lib_JSON.version_lib = "0.17";
+  my_config->status.lib_JSON.date_lib    = "12.12.2022";
   
   SPIFFS.begin();
   Serial.println(F("Loading configuration..."));
@@ -247,7 +247,9 @@ void MyClass_JSON::Config_PCF8575(const char *filename, MyClass_Config *my_confi
 
   if (!error_load_config){
     byte i1,n1,i2,n2,s1;
+    byte col_DO; // количество выходов для создания тестовых значений
     String s;    
+    col_DO = 0;
     my_config->config.PCF8575.col = doc["PCF8575"]["Col"].as<unsigned char>();
     n1 = my_config->config.PCF8575.col;
     my_config->config.PCF8575.board = new MyStruct_board_PCF8575[n1];
@@ -256,10 +258,22 @@ void MyClass_JSON::Config_PCF8575(const char *filename, MyClass_Config *my_confi
   
       s = doc["PCF8575"]["board"][i1]["Type"].as<String>();
       if (s == "DI"){s1 = 1;}
-      if (s == "DO"){s1 = 2;}
+      if (s == "DO"){s1 = 2; col_DO += 16;}
       if (s == "DIO"){s1 = 3;}
       my_config->config.PCF8575.board[i1].Type = s1;
     } 
+
+    my_config->config.DOs_test.col = col_DO;
+    my_config->config.DOs_test.DO_test = new MyStruct_DO_test[col_DO];
+    byte i3 = 0;
+    for (i1 = 0; i1 < my_config->config.PCF8575.col; i1++){
+      for (i2 = 0; i2 < 16; i2++){
+        my_config->config.DOs_test.DO_test[i3].is_set = false;
+        my_config->config.DOs_test.DO_test[i3].I2C_adr = my_config->config.PCF8575.board[i1].I2C_adr;
+        my_config->config.DOs_test.DO_test[i3].num_out = i2;
+        i3 += 1;
+      }
+    }
   }
   doc.clear();
 }
