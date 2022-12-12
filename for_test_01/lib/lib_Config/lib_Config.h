@@ -93,6 +93,18 @@ struct MyStruct_DOs {
   MyStruct_DO *DO;
 };
 //********************************
+struct MyStruct_DO_test {
+  byte Cmd;
+  bool is_set;
+  byte I2C_adr;
+  byte num_out;
+};
+//********************************
+struct MyStruct_DOs_test {
+  byte col; 
+  MyStruct_DO_test *DO_test;
+};
+//********************************
 struct MyStruct_RS_Triger {
   bool val;              // значение итоговое
   String Description;    // дескриптор
@@ -131,6 +143,7 @@ struct MyStruct_DS18B20 {
 struct MyStruct_Config {
   MyStruct_DIs DIs;
   MyStruct_DOs DOs;
+  MyStruct_DOs_test DOs_test;
   MyStruct_WiFi WiFi;
   MyStruct_MQTT MQTT;
   MyStruct_FTP FTP;
