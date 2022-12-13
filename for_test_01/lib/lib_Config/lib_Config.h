@@ -102,6 +102,7 @@ struct MyStruct_DO_test {
 //********************************
 struct MyStruct_DOs_test {
   byte col; 
+  bool is_set;               // если естановлен хотя бы один из выходов
   MyStruct_DO_test *DO_test;
 };
 //********************************

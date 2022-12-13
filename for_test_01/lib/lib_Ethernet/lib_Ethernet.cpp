@@ -146,12 +146,36 @@ void MyClass_Ethernet::receivePacket() {
           // MyClass_NTP *my_NTP = (MyClass_NTP*)settings->data.NTP;
           // my_NTP->SetLocalTime(msg);
         }else if(msg.startsWith(MSG_LIST[16])){ 
-          DEBUG("команда тестирования выхода DO");
           msg.replace(MSG_LIST[16] + "_", "");
-          DEBUG(msg);
-          // settings.
-          // MyClass_NTP *my_NTP = (MyClass_NTP*)settings->data.NTP;
-          // my_NTP->SetLocalTime(msg);
+          DEBUG("команда тестирования выхода DO" + msg);
+          int8_t s1 = StrWithSeparator_GetNStr(msg, '_', 0).toInt(); // I2C_adr
+          int8_t s2 = StrWithSeparator_GetNStr(msg, '_', 1).toInt(); // num_out
+          int8_t s3 = StrWithSeparator_GetNStr(msg, '_', 2).toInt(); // Cmd
+          DEBUG(settings->config.DOs_test.col);
+          for (byte i=0; i < settings->config.DOs_test.col; i++){
+            byte b1 = settings->config.DOs_test.DO_test[i].I2C_adr;
+            byte b2 = settings->config.DOs_test.DO_test[i].num_out;
+            // DEBUG("b1=", b1);
+            // DEBUG("b2=", b2);
+            if (b1 == s1 and b2 == s2){
+              // DEBUG("i=", i);
+              if (s3 == 2){
+                settings->config.DOs_test.DO_test[i].is_set = false;
+              } else {
+                settings->config.DOs_test.DO_test[i].is_set = true;
+                settings->config.DOs_test.DO_test[i].Cmd = s3;
+              }
+              break;
+            }
+          }
+          settings->config.DOs_test.is_set = false;
+          for (byte i=0; i < settings->config.DOs_test.col; i++){
+            bool b1 = settings->config.DOs_test.DO_test[i].is_set;
+            if (b1 == true){
+              settings->config.DOs_test.is_set = true;
+              break;
+            }
+          }
         }
       }
     }

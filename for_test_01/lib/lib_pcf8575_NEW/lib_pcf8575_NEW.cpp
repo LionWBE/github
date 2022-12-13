@@ -106,6 +106,25 @@ void MyClass_PCF8575::start(){
         byte state = settings->config.DOs.DO[link].Cmd;   // требуемое для выставления состояние
         byte cur_state = get_val_bit_by_number(i, all_state_do); // текущее состояние выхода
         
+        if (settings->config.DOs_test.is_set){ // если есть хотя бы одна подстановка ищем что соответствует и меняем значение
+          for (byte j=0; j < settings->config.DOs_test.col; j++){
+            byte b1 = settings->config.DOs_test.DO_test[j].I2C_adr;
+            byte b2 = settings->config.DOs_test.DO_test[j].num_out;
+            bool is_set = settings->config.DOs_test.DO_test[j].is_set;
+            if (b1 == I2C_adr and b2 == i and is_set){
+              // Serial.print("state before = ");
+              // Serial.println(state);              
+              state = settings->config.DOs_test.DO_test[j].Cmd;
+              // Serial.print("state after = ");
+              // Serial.println(state);              
+              // Serial.print("j = ");
+              // Serial.println(j);              
+              // delay(100);
+              break;
+            }
+          }
+        }
+        // if settings->
         // Serial.print("i = ");
         // Serial.println(i);
         // Serial.print("state = ");
@@ -210,12 +229,12 @@ void MyClass_PCF8575::write_state_DO(){
   Wire.endTransmission(); 
 
 
-  // Serial.print("I2C_adr = ");
-  // Serial.println(I2C_adr); 
-  // Serial.print("cur_state_1 = ");
-  // Serial.println(cur_state_1);  
-  // Serial.print("cur_state_2 = ");
-  // Serial.println(cur_state_2);    
+  Serial.print("I2C_adr = ");
+  Serial.println(I2C_adr); 
+  Serial.print("cur_state_1 = ");
+  Serial.println(cur_state_1);  
+  Serial.print("cur_state_2 = ");
+  Serial.println(cur_state_2);    
   // delay(1000);
 }
 //-------------------------------------------------------------------------------------------------------------------------------------
