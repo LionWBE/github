@@ -264,14 +264,17 @@ void MyClass_JSON::Config_PCF8575(const char *filename, MyClass_Config *my_confi
     } 
 
     my_config->config.DOs_test.col = col_DO;
+    my_config->config.DOs_test.is_set = false;
     my_config->config.DOs_test.DO_test = new MyStruct_DO_test[col_DO];
     byte i3 = 0;
     for (i1 = 0; i1 < my_config->config.PCF8575.col; i1++){
-      for (i2 = 0; i2 < 16; i2++){
-        my_config->config.DOs_test.DO_test[i3].is_set = false;
-        my_config->config.DOs_test.DO_test[i3].I2C_adr = my_config->config.PCF8575.board[i1].I2C_adr;
-        my_config->config.DOs_test.DO_test[i3].num_out = i2;
-        i3 += 1;
+      if(my_config->config.PCF8575.board[i1].Type == 2){
+        for (i2 = 0; i2 < 16; i2++){
+          my_config->config.DOs_test.DO_test[i3].is_set = false;
+          my_config->config.DOs_test.DO_test[i3].I2C_adr = my_config->config.PCF8575.board[i1].I2C_adr;
+          my_config->config.DOs_test.DO_test[i3].num_out = i2;
+          i3 += 1;
+        }
       }
     }
   }

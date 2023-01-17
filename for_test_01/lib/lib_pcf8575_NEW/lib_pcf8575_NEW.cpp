@@ -184,12 +184,12 @@ void MyClass_PCF8575::write_state_DO(){
   Wire.endTransmission(); 
 
 
-  // Serial.print("I2C_adr = ");
-  // Serial.println(I2C_adr); 
-  // Serial.print("cur_state_1 = ");
-  // Serial.println(cur_state_1);  
-  // Serial.print("cur_state_2 = ");
-  // Serial.println(cur_state_2);    
+  Serial.print("I2C_adr = ");
+  Serial.println(I2C_adr); 
+  Serial.print("cur_state_1 = ");
+  Serial.println(cur_state_1);  
+  Serial.print("cur_state_2 = ");
+  Serial.println(cur_state_2);    
   // delay(1000);
 }
 //-------------------------------------------------------------------------------------------------------------------------------------
