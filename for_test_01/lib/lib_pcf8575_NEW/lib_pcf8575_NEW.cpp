@@ -1,4 +1,4 @@
-//version 0.19 date 08/11/2022
+//version 0.20 date 17/01/2023
 #include "lib_PCF8575_NEW.h"
 //-----------------(методы класса MyClass_PCF8575)---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -39,6 +39,10 @@ void MyClass_PCF8575::setup(MyClass_Config *my_config, byte num_board){
   All_DI_is_set = false;
   timer_link.time_delay_const = 1000;
   timer_link.start();  
+  timer_write_do.time_delay_const = 20;  // частота записи в выхода 50 раз в секунду, 50 Гц
+  timer_write_do.start();  
+  timer_read_di.time_delay_const = 500; // частота записи в выхода 2 раза в секунду, 2 Гц
+  timer_read_di.start();    
 }
 //-----------------(методы класса MyClass_PCF8575)---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -68,7 +72,6 @@ void MyClass_PCF8575::setup_DO_one(byte i, byte num_board){
   DI[i].is_enable = false;
   DO[i].is_enable = true;
   DO[i].setup(settings);
-  // DO[i].
   link_to_DO_in_config[i] = 255; 
   for (byte j = 0; j < settings->config.DOs.col; j++) {
     if (num_board == settings->config.DOs.DO[j].PCF8575_adr.board_num){
@@ -84,10 +87,10 @@ void MyClass_PCF8575::setup_DO_one(byte i, byte num_board){
 //-----------------(методы класса MyClass_PCF8575)---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
 void MyClass_PCF8575::start(){
-  if(All_DI_is_set == false){   //  если есть неустановившийся режим для DI
+  if(All_DI_is_set == false or timer_read_di.is_done()){   //  если есть неустановившийся режим для DI или чтение 2 раза в секунду
     read_state_DI();
   }
-  if(timer_link.is_done()){
+  if(timer_link.is_done()){ // если срабатал таймер линка (1000 мс)
     Wire.beginTransmission(I2C_adr);
     byte error = Wire.endTransmission();
     if (error == 0){    // online
@@ -95,52 +98,23 @@ void MyClass_PCF8575::start(){
     }else{              // offline
       is_online = false;
     }
-    my_Tags->SetTagVal(MQTT_link_adr[0], is_online); // 192 mks  //error here
-    my_Tags->SetTagVal(MQTT_link_adr[1], I2C_adr);   // 19 mks   //error here    
+    my_Tags->SetTagVal(MQTT_link_adr[0], is_online); // 192 mks  // выставляем состояние линка 
+    my_Tags->SetTagVal(MQTT_link_adr[1], I2C_adr);   // 19 mks   // выставляем адрес платы
   }
 
-  for (byte i = 0; i < 16; i++){ // 292 mks
-    if (DO[i].is_enable){
+  if (board_type==2 and timer_write_do.is_done()){
+    for (byte i = 0; i < 16; i++){ // 292 mks
       byte link = link_to_DO_in_config[i];
-      if(link != 255){                                    // поидее условие никогда не должно выполняться, т.к. все должно быть привязвано
-        byte state = settings->config.DOs.DO[link].Cmd;   // требуемое для выставления состояние
+      if(link != 255){                                           // поидее условие никогда не должно выполняться, т.к. все должно быть привязвано
+        byte state = settings->config.DOs.DO[link].Cmd;          // требуемое для выставления состояние
         byte cur_state = get_val_bit_by_number(i, all_state_do); // текущее состояние выхода
-        
-        // Serial.print("i = ");
-        // Serial.println(i);
-        // Serial.print("state = ");
-        // Serial.println(state);
-        // Serial.print("cur_state = ");
-        // Serial.println(cur_state);
         if(cur_state != state){
           all_state_do ^= (1 << i);
         }
       }
     }
+    write_state_DO(); // запись значения DO в выхода
   }
-  // Serial.print("all_state_do = ");
-  // Serial.println(all_state_do);
-  // delay(100);
-  
-  if (DO[0].is_enable){
-    write_state_DO();
-  }
-  //     bool enable = settings->config.DOs.DO[link_to_DO_in_config[i]].LinkTo.Enable;
-  //     if (enable){
-  //       byte type = settings->config.DOs.DO[link_to_DO_in_config[i]].LinkTo.type;
-  //       byte link = settings->config.DOs.DO[link_to_DO_in_config[i]].LinkTo.link;
-  //       byte state = 0;
-  //       if (type == 1){
-  //         state = RSTrig(settings, link);
-  //       }
-  //       write_state_one_DO(i, state);
-  //     }
-  //   }
-  // }
-  // for (byte i = 0; i < 16; i++){ // 292 mks
-    // if (DI[i].is_enable) my_Tags->SetTagVal(MQTT_link_val[i], DI[i].val_curr);
-    // if (DO[i].is_enable) my_Tags->SetTagVal(MQTT_link_val[i], DO[i].val_curr);
-  // } 
 }
 //-----------------(методы класса MyClass_PCF8575)---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -233,8 +207,8 @@ void MyClass_all_PCF8575::setup(MyClass_Config *my_config){
   for (byte i = 0; i < col_board; i++) {
     board[i].setup(settings, i);
   }
-  settings->status.lib_PCF8575.version_lib = "0.19";
-  settings->status.lib_PCF8575.date_lib    = "08.11.2022";    
+  settings->status.lib_PCF8575.version_lib = "0.20";
+  settings->status.lib_PCF8575.date_lib    = "17.01.2023";    
   Serial.println("MyClass_all_PCF8575 setup done");
 }
 //-----------------(методы класса MyClass_all_PCF8575)---------------------------------------------------------------------------------------------------------------
